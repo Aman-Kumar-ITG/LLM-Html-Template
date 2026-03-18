@@ -1,0 +1,1279 @@
+01
+
+Foundations of LLMs
+
+Large Language Models are probabilistic machines that predict the next token in a sequence. Everything they do — writing code, answering questions, translating languages — emerges from this single capability, scaled across billions of parameters and trillions of training tokens.
+
+Transformers, Tokens, and Embeddings
+
+Tokenization
+
+Before any processing, raw text is split into tokens — sub-word units. Most modern LLMs use Byte-Pair Encoding (BPE) or SentencePiece. The word "unhappiness" might become ["un", "happiness"] or ["un", "happ", "iness"] depending on the tokenizer's vocabulary. GPT-4's tokenizer has ~100k tokens. A useful rule of thumb: 1 token ≈ ¾ of a word in English.
+
+Embeddings
+
+Each token maps to a high-dimensional vector (e.g., 4096 dimensions for a 7B parameter model). These vectors are learned during training and encode semantic relationships. Crucially, positional embeddings are added so the model knows where each token sits in the sequence — transformers have no inherent sense of order without this.
+
+The Transformer Architecture
+
+The transformer (Vaswani et al., 2017) is the engine behind every modern LLM. Here is a simplified view of one transformer block:
+
+Input Tokens
+
+  │
+
+  ▼
+
+┌─────────────────────────────────┐
+
+│ Token Embedding + Positional │
+
+│ Embedding (learned vectors) │
+
+└──────────────┬──────────────────┘
+
+  │
+
+  ▼
+
+┌─────────────────────────────────┐
+
+│ Multi-Head Self-Attention │ ← "Which other tokens should I attend to?"
+
+│ │
+
+│ Q = X·Wq K = X·Wk V = X·Wv│
+
+│ Attention = softmax(QKᵀ/√ d)·V │
+
+│ │
+
+│ (Multiple heads in parallel, │
+
+│ then concatenated & projected)│
+
+└──────────────┬──────────────────┘
+
+│ + Residual Connection
+
+│ + Layer Normalization
+
+  ▼
+
+┌─────────────────────────────────┐
+
+│ Feed-Forward Network (FFN) │ ← 2-layer MLP, often with GeLU activation
+
+│ (expands then contracts │ Typically 4× the hidden dimension
+
+│ the representation) │
+
+└──────────────┬──────────────────┘
+
+│ + Residual Connection
+
+│ + Layer Normalization
+
+  ▼
+
+Repeat × N layers
+
+(32 for 7B, 80 for 70B, 120+ for frontier models)
+
+  │
+
+  ▼
+
+┌─────────────────────────────────┐
+
+│ Linear → Softmax │ ← Projects to vocabulary size
+
+│ (probability over all tokens) │ Picks the next token
+
+└─────────────────────────────────┘
+
+
+Self-Attention: The Core Mechanism
+
+Self-attention is what makes transformers powerful. For each token, it computes three vectors:
+
+Query (Q): "What am I looking for?" Key (K): "What do I contain?" Value (V): "What information do I carry?"
+
+The attention score between token i and token j is the dot product of Qi and Kj, scaled by √d to prevent gradient explosion. This score determines how much token i should "attend to" (draw information from) token j.
+
+Analogy: The Cocktail Party
+
+Imagine you're at a loud party (all the tokens). You ask a question (Query). Everyone holds up a name tag describing themselves (Key). You decide who to listen to based on how relevant their name tag is to your question. Then you absorb what they're saying (Value). Multi-head attention means you can simultaneously listen for different types of information — one head tracks grammar, another tracks semantics, another tracks co-reference.
+
+Why Multi-Head?
+
+Instead of one attention computation, the model runs 32–128 parallel attention "heads," each with its own Q/K/V projection matrices. Different heads learn to capture different relationships: syntactic dependencies, co-reference, semantic similarity, positional patterns. The outputs are concatenated and linearly projected back to the model dimension.
+
+Training vs Inference
+
+Aspect Training Inference
+
+Goal Learn parameters (weights) via backpropagation Generate output using fixed weights
+
+Compute Thousands of GPUs for weeks/months Single GPU / TPU per request
+
+Data Trillions of tokens from internet, books, code User's prompt + context window
+
+Cost $10M–$100M+ for frontier models $0.001–$0.06 per 1K tokens
+
+Phases Pre-training → SFT → RLHF/DPO Prompt → KV cache → Autoregressive decoding
+
+Training Phases in Detail
+
+Pre-training: The model sees trillions of tokens and learns to predict the next token. This is unsupervised — no labeled data needed. The loss function is cross-entropy between the predicted token distribution and the actual next token. This phase accounts for ~95% of total compute.
+
+Supervised Fine-Tuning (SFT): The pre-trained model is fine-tuned on curated (prompt, ideal_response) pairs. This teaches it to follow instructions and produce helpful outputs instead of just completing text.
+
+RLHF / DPO: Human preference data (which response is better?) trains a reward model, which then guides further optimization. DPO (Direct Preference Optimization) achieves similar results without a separate reward model by directly optimizing the policy from preference pairs.
+
+Inference Optimization
+
+KV Cache: During autoregressive generation, the model caches the Key and Value tensors from previous tokens so they don't need recomputation. For a 70B model with 128K context, the KV cache alone can consume 40+ GB of GPU memory.
+
+Speculative Decoding: A smaller "draft" model generates candidate tokens quickly, and the larger model verifies them in parallel — accepting correct guesses and fixing wrong ones. This can yield 2–3× speedup without quality loss.
+
+Limitations
+
+Limitation What Happens Mitigation
+
+Hallucination Generates plausible but false information with high confidence RAG, grounding, citations, chain-of-thought verification
+
+Context Window Fixed max tokens (4K–2M); performance degrades in the "middle" of long contexts Chunking, summarization, hierarchical retrieval
+
+Knowledge Cutoff No awareness of events after training data ends RAG with live data sources, tool use
+
+Reasoning Brittleness Fails on novel logical/mathematical problems despite appearing capable Chain-of-thought prompting, tool-augmented reasoning, code execution
+
+Cost at Scale Large context + long output = expensive compute Caching, model routing, smaller models for simple tasks
+
+02
+
+Retrieval-Augmented Generation (RAG)
+
+RAG solves the fundamental tension: LLMs have broad knowledge but can't know your data, and their knowledge becomes stale after training. RAG injects relevant, up-to-date context into the prompt at inference time.
+
+Why RAG?
+
+Instead of fine-tuning a model on your proprietary data (expensive, slow, still hallucinates), you retrieve the most relevant chunks from your knowledge base and inject them into the prompt. The model then generates an answer grounded in that retrieved context.
+
+Analogy: The Open-Book Exam
+
+Fine-tuning = studying for weeks, hoping you memorize everything. RAG = bringing your textbooks to the exam and looking up the answer when needed. RAG is cheaper, more controllable, and keeps your data fresh.
+
+End-to-End RAG Pipeline
+
+  ┌─────────────────────────────────────────────────  ─┐
+
+│ INDEXING PIPELINE (offline) │
+
+  │    │
+
+  Raw Documents │ ┌──────┐ ┌──────────┐ ┌───────────┐ │
+
+(PDF, HTML, MD, DB) ──────▶│Parse │──▶│ Chunk │──▶│ Embed │ │
+
+  │ └──────┘ └──────────┘ └─────┬─────┘ │
+
+  │    │ │
+
+  │ ┌─────────────▼──────────┐ │
+
+│ │ Vector Database │ │
+
+│ │ (+ metadata store) │ │
+
+  │ └─────────────┬──────────┘ │
+
+  └───────────────────────────────────┼─────────────  ┘
+
+     │
+
+  ┌───────────────────────────────────┼─────────────  ┐
+
+│ QUERY PIPELINE (online) │
+
+  │    │ │
+
+User Query ─────┐ │ │ │
+
+  │ │ ┌──────────┐ ┌──────────┐ │ │
+
+  ├─────────▶│ Embed │─▶│ Search │◀──────┘ │
+
+│ │ │ Query │ │ Top-K │ │
+
+  │ │ └──────────┘ └────┬─────┘ │
+
+  │ │ │    │
+
+  │ │ ┌─────▼─────┐ │
+
+│ │ │ Rerank │ ← Cross-encoder │
+
+  │ │ └─────┬─────┘ or hybrid │
+
+  │ │ │    │
+
+  │ │ ┌──────────────────▼──────────────────┐ │
+
+└──────────▶ PROMPT CONSTRUCTION │ │
+
+│ │ System prompt + Retrieved chunks │ │
+
+│ │ + User query + Instructions │ │
+
+  │ └──────────────────┬──────────────────┘ │
+
+  │ │    │
+
+  │ ┌─────▼─────┐ │
+
+  │ │ LLM │ │
+
+│ │ Generate │ │
+
+  │ └─────┬─────┘ │
+
+  │ │    │
+
+  │ ┌─────▼─────┐ │
+
+│ │ Answer │ │
+
+│ │ + Sources │ │
+
+  │ └───────────┘ │
+
+  └─────────────────────────────────────────────────  ┘
+
+
+RAG vs Fine-Tuning: When to Use What
+
+Criterion RAG Fine-Tuning
+
+Data freshness Real-time updates; re-index and done Requires re-training; stale within days
+
+Cost Low — embedding + storage + retrieval High — GPU hours for training
+
+Factual grounding Excellent — cites specific sources Poor — knowledge is "baked in," hard to verify
+
+Style/behavior change Limited — prompt engineering only Excellent — learns new patterns
+
+Domain vocabulary Handles via context injection Deeply internalizes jargon
+
+Best for Q&A over docs, support, search, legal, compliance Code generation, specific tone, structured output
+
+Production Reality
+
+Most production systems use both. Fine-tune a smaller model on your domain for cost/latency, then augment it with RAG for factual grounding. For example: fine-tune a 7B model to understand your company's terminology, then use RAG to inject current product specs and pricing.
+
+Real-World RAG Examples
+
+Customer Support Bot: Index your help center articles, product docs, and past ticket resolutions. When a customer asks "How do I reset my API key?", retrieve the relevant doc section and generate a contextual answer with a link to the source.
+
+Legal Contract Review: Index thousands of contracts. Lawyers ask "What are the termination clauses in our agreements with suppliers in Germany?" The system retrieves relevant clauses across multiple contracts and synthesizes the answer.
+
+Internal Knowledge Base: Index Confluence, Notion, Slack, and Google Drive. Engineers ask "What was the decision on the database migration?" and get an answer grounded in meeting notes and design docs.
+
+03
+
+Vector Embeddings
+
+What Are Embeddings?
+
+An embedding is a dense vector representation of a piece of text (word, sentence, paragraph, or document) in a continuous vector space. Semantically similar texts end up as nearby points in this space. The key insight: meaning is encoded as geometry.
+
+High-dimensional embedding space (projected to 2D):
+
+"machine learning"
+
+  •
+
+"deep learning" •
+
+• "neural network"
+
+"dog" •
+
+"puppy" •
+
+"cat" •
+
+• "transformer model"
+
+• "kitten"
+
+"coffee" •
+
+• "espresso"
+
+"latte" •
+
+─── Similar concepts cluster together ───
+
+─── Distance ≈ Semantic difference ───
+
+
+How Embedding Models Work
+
+Modern embedding models (like OpenAI's text-embedding-3-large, Cohere's embed-v3, or open-source BGE-M3) are typically transformer encoders trained with contrastive learning:
+
+Step 1: Take pairs of texts known to be semantically similar (e.g., a question and its answer, a query and a relevant document).
+
+Step 2: Encode both texts through the transformer to produce vectors.
+
+Step 3: Train the model to push similar pairs closer together and pull dissimilar pairs apart in the vector space. This is the contrastive loss (e.g., InfoNCE).
+
+Step 4: The final embedding is typically the mean of all token embeddings (mean pooling) or the [CLS] token's representation.
+
+Similarity Metrics
+
+Metric Formula Range Best For
+
+Cosine Similarity cos(A,B) = A·B / (‖A‖·‖B‖) [-1, 1] Most common; handles varying text lengths well. Measures angle between vectors, ignoring magnitude.
+
+Dot Product A·B = Σ(Aᵢ × Bᵢ) (-∞, +∞) When magnitude matters (e.g., document importance). Faster to compute. Equivalent to cosine if vectors are normalized.
+
+Euclidean (L2) ‖A-B‖ = √Σ(Aᵢ-Bᵢ)² [0, +∞) When absolute distance matters. Less common for text; more for image embeddings.
+
+Practical Tip
+
+Most embedding models produce normalized vectors (unit length), which means cosine similarity and dot product give identical results. Always check your model's documentation — if it normalizes, use dot product for speed.
+
+Embedding Model Comparison
+
+Model Dimensions Max Tokens Notes
+
+OpenAI text-embedding-3-large 3072 (adjustable) 8191 Strong general-purpose; supports dimension reduction via API parameter
+
+OpenAI text-embedding-3-small 1536 8191 5× cheaper; good for most use cases
+
+Cohere embed-v3 1024 512 Supports input_type parameter (query vs document) for asymmetric search
+
+BGE-M3 (open source) 1024 8192 Multi-lingual, multi-granularity. Supports dense + sparse + colbert retrieval
+
+Voyage-3 (Voyage AI) 1024 32000 Strong for code and long documents
+
+Nomic-embed-text-v1.5 768 8192 Open-source, Matryoshka (variable dimension), competitive quality
+
+Key Trade-offs
+
+Dimension count: Higher dimensions = more expressive, but more storage and slower search. 768–1536 is the sweet spot for most applications. OpenAI's Matryoshka-style models let you truncate dimensions at query time.
+
+Asymmetric search: Some models (Cohere, E5) are trained with separate "query" and "document" modes. A short query like "API rate limits" retrieves long document passages. Using the right mode improves recall by 5–15%.
+
+Self-hosting vs API: Open-source models (BGE, Nomic, E5) can run on your own GPU, eliminating API costs and data-privacy concerns. A single A10G GPU can serve 100+ req/sec for a 768-dim model.
+
+04
+
+Chunking Strategies
+
+Why Chunking Is Necessary
+
+Embedding models have max token limits (512–8192). Even if you could embed an entire document, the embedding would be too "diluted" — a 50-page document compressed into one 1024-dim vector loses most specific details. Chunking lets you create focused, retrievable units of meaning.
+
+The Chunking Paradox
+
+Too small: Chunks lack context → the LLM can't understand them without surrounding information.
+
+Too large: Chunks mix multiple topics → retrieval returns irrelevant content alongside relevant content, diluting precision.
+
+Chunking Methods
+
+1. Fixed-Size Chunking
+
+Split text into chunks of N tokens/characters with an overlap of M tokens.
+
+# Fixed chunking with overlap
+
+def fixed_chunk(text, chunk_size=500, overlap=50):
+
+words = text.split()
+
+chunks = []
+
+for i in range(0, len(words), chunk_size - overlap):
+
+chunk = ' '.join(words[i:i + chunk_size])
+
+chunks.append(chunk)
+
+return chunks
+
+✓ Pros
+
+Simple to implement
+
+Predictable chunk sizes
+
+Fast processing
+
+✗ Cons
+
+Splits mid-sentence / mid-thought
+
+No semantic awareness
+
+Overlap wastes storage
+
+2. Semantic Chunking
+
+Uses sentence embeddings to detect topic boundaries. Compute the cosine similarity between consecutive sentences; when similarity drops below a threshold, split there.
+
+# Semantic chunking (conceptual)
+
+from sentence_transformers import SentenceTransformer
+
+import numpy as np
+
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+def semantic_chunk(sentences, threshold=0.75):
+
+embeddings = model.encode(sentences)
+
+chunks, current_chunk = [], [sentences[0]]
+
+
+for i in range(1, len(sentences)):
+
+sim = np.dot(embeddings[i], embeddings[i-1]) / (
+
+np.linalg.norm(embeddings[i]) * np.linalg.norm(embeddings[i-1])
+
+)
+
+if sim < threshold:
+
+chunks.append(' '.join(current_chunk))
+
+current_chunk = [sentences[i]]
+
+else:
+
+current_chunk.append(sentences[i])
+
+
+chunks.append(' '.join(current_chunk))
+
+return chunks
+
+3. Recursive / Structural Chunking
+
+Respects document structure. Split first by headers (H1 → H2 → H3), then by paragraphs, then by sentences if still too large. This preserves the natural hierarchy of the document.
+
+4. Sliding Window with Stride
+
+Overlapping windows ensure no information is lost at boundaries. A 512-token window with 128-token stride means each point in the document is covered by ~4 chunks.
+
+Chunk Size Trade-offs
+
+Chunk Size Retrieval Precision Context Quality Best For
+
+128–256 tokens High (very specific) Low (needs surrounding context) FAQ, factoid questions, code snippets
+
+256–512 tokens Balanced Balanced Most general-purpose RAG
+
+512–1024 tokens Lower (more noise) High (self-contained) Long-form analysis, legal docs, narratives
+
+Best Practices by Data Type
+
+Data Type Strategy Details
+
+PDFs Structural + fallback to fixed Extract sections via headers/page structure. Use OCR for scanned docs. Preserve tables as markdown or JSON.
+
+Code AST-based chunking Split by function/class boundaries using the AST. Keep docstrings with their functions. Include import context.
+
+HTML DOM-tree aware Chunk by semantic HTML elements (article, section, main). Strip nav/footer. Preserve heading hierarchy.
+
+Chat logs / Slack Thread-based Keep conversation threads intact. Each thread = one chunk. Add metadata: participants, channel, date.
+
+Tables / CSV Row-group or column-description Don't chunk row-by-row. Group related rows. Prepend column headers to each chunk. Consider serializing as natural language.
+
+Advanced: Parent-Child Chunking
+
+Index small chunks for precise retrieval, but when a small chunk matches, return its parent (larger surrounding context) to the LLM. This gives you the best of both worlds: precise matching + rich context.
+
+05
+
+Vector Search
+
+How Vector Databases Work
+
+A vector database stores embeddings and supports fast approximate nearest-neighbor (ANN) queries. When you search for "how to reset my password," your query is embedded into the same vector space, and the database finds the K closest stored vectors.
+
+The naive approach (brute-force comparison against every vector) is O(n×d) — unusable at millions of vectors. ANN algorithms trade a small accuracy loss for massive speed gains.
+
+ANN Algorithms
+
+HNSW (Hierarchical Navigable Small World)
+
+The most popular ANN algorithm. Builds a multi-layer graph where each node is a vector. Higher layers have fewer, more dispersed connections (for coarse navigation), lower layers have dense local connections (for precise search).
+
+HNSW Graph Structure:
+
+  Layer 2 (sparse): A ──────────────────── F
+
+  │ │
+
+Layer 1 (medium): A ──── C ──── E ────── F
+
+  │ │ │ │
+
+Layer 0 (dense): A ─ B ─ C ─ D ─ E ─ F ─ G ─ H
+
+Search: Enter at top layer, greedily navigate to closest node,
+
+drop to next layer, repeat until Layer 0.
+
+Return K nearest neighbors from Layer 0 search.
+
+Build time: O(n·log(n)) Search time: O(log(n))
+
+Memory: O(n·M) where M = connections per node
+
+
+IVF (Inverted File Index)
+
+Clusters vectors using K-means into nlist cells. At query time, only searches the nprobe nearest cells instead of all vectors. Think of it as a library: instead of searching every shelf, you first determine which section your book is in.
+
+Product Quantization (PQ)
+
+Compresses vectors by splitting each into sub-vectors and quantizing each sub-vector to the nearest centroid from a learned codebook. Reduces memory by 10–50×, with some accuracy loss. Often combined with IVF as IVF-PQ.
+
+Algorithm Memory Build Speed Query Speed Recall@10 Best For
+
+Flat (brute force) High O(1) O(n) 100% <100K vectors, when accuracy is paramount
+
+IVF-Flat High Moderate O(n/nlist) 95–99% 1M+ vectors, moderate memory budget
+
+IVF-PQ Low Slow Fast 85–95% 100M+ vectors, tight memory budget
+
+HNSW High Slow Very fast 97–99% Most production use cases <50M vectors
+
+ScaNN Medium Moderate Very fast 95–99% Google's algorithm; great for large scale
+
+Vector Database Comparison
+
+Database Type Strengths Best For
+
+Pinecone Managed SaaS Zero ops, fast, great DX, serverless tier Startups, quick prototypes, teams without infra engineers
+
+Weaviate Open-source / Cloud Hybrid search built-in, GraphQL API, modules Hybrid keyword+vector search needs
+
+Qdrant Open-source / Cloud Rust-based performance, rich filtering, payload storage Performance-critical apps, complex filtering
+
+ChromaDB Open-source (embedded) Simplest API, runs in-process, great for prototyping Local dev, small-scale apps, learning
+
+pgvector PostgreSQL extension Uses your existing Postgres; familiar SQL interface Teams already on Postgres; simpler infra
+
+Milvus Open-source Massive scale (billions of vectors), GPU support Enterprise-scale, billion-vector workloads
+
+Decision Framework
+
+≤1M vectors, simple needs: pgvector or ChromaDB
+
+1–50M vectors, production: Pinecone, Qdrant, or Weaviate
+
+50M+ vectors: Milvus or Qdrant with sharding
+
+Already on Postgres: pgvector first, graduate when you hit limits
+
+06
+
+Reranking Techniques
+
+Why Reranking?
+
+Vector search is a bi-encoder approach: query and documents are embedded independently, then compared. This is fast but loses nuance — it can't capture fine-grained interactions between query and document tokens.
+
+Reranking adds a second stage that jointly processes the query and each candidate document, capturing deeper semantic relationships. It's like the difference between scanning book covers (retrieval) versus reading the first page of each (reranking).
+
+Two-Stage Retrieval Pipeline:
+
+User Query
+
+  │
+
+  ▼
+
+  ┌─────────────────┐
+
+│ Stage 1: │ Bi-encoder (fast, approximate)
+
+│ Vector Search │ Retrieves top-100 candidates
+
+│ (Recall) │ Latency: ~10ms
+
+  └────────┬────────┘
+
+│ top-100
+
+  ▼
+
+  ┌─────────────────┐
+
+│ Stage 2: │ Cross-encoder (slow, precise)
+
+│ Reranker │ Rescores and reorders to top-5
+
+│ (Precision) │ Latency: ~100–300ms
+
+  └────────┬────────┘
+
+│ top-5
+
+  ▼
+
+LLM Prompt
+
+
+Bi-Encoder vs Cross-Encoder
+
+Property Bi-Encoder (Retrieval) Cross-Encoder (Reranking)
+
+How it works Encodes query and doc separately → compare vectors Concatenates [query, doc] → feeds through transformer → outputs relevance score
+
+Speed ~1ms per 1M docs (with ANN index) ~5–15ms per document pair
+
+Quality Good recall, moderate precision Excellent precision (10–20% improvement typical)
+
+Scalability Billions of docs (pre-computed) Only feasible for 50–200 candidates
+
+Examples BGE, text-embedding-3, E5 Cohere Rerank, BGE-reranker-v2, cross-encoder/ms-marco
+
+Hybrid Search: Keyword + Vector
+
+Pure vector search misses exact matches (product IDs, error codes, names). Pure keyword search (BM25) misses semantic matches. Hybrid search combines both:
+
+User Query: "ERR-4032 authentication failure"
+
+  │
+
+├──▶ BM25 (keyword) ──▶ Finds exact "ERR-4032" matches
+
+  │
+
+└──▶ Vector Search ───▶ Finds semantic "login error", "auth token expired"
+
+  │
+
+  ▼
+
+  ┌─────────────────────┐
+
+│ Reciprocal Rank │ RRF(d) = Σ 1 / (k + rank_i(d))
+
+│ Fusion (RRF) │ Merges both ranked lists
+
+  └──────────┬──────────┘
+
+  │
+
+  ▼
+
+Reranker (optional)
+
+  │
+
+  ▼
+
+Final top-K
+
+
+Reciprocal Rank Fusion (RRF) is the most common merging strategy. For each document, sum 1/(k + rank) across all retrieval methods, where k is typically 60. Documents that rank highly in multiple methods get boosted.
+
+Production Configuration
+
+In practice, the strongest pipeline is: Hybrid (BM25 + vector) → Reranker → LLM. Weaviate, Qdrant, and Pinecone all support hybrid search natively. For reranking, Cohere's Rerank API or open-source bge-reranker-v2-m3 are proven production choices.
+
+07
+
+Document Indexing
+
+Indexing Pipeline Architecture
+
+Raw Sources Processing Storage
+
+  ────────── ──────────    ───────
+
+PDF files ─┐
+
+  HTML pages ─┤ ┌─────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────┐
+
+Markdown ─┼─▶│ Parse │─▶│ Clean │─▶│ Chunk │─▶│ Embed + │
+
+Databases ─┤ │& Extract│ │& Normalize│ │& Enrich │ │ Store │
+
+  APIs ─┤ └─────────┘ └──────────┘ └──────────┘ └──────┬───────┘
+
+Confluence ─┘ │
+
+     ┌────────┴────────┐
+
+│ Vector DB │
+
+│ + Metadata │
+
+│ + Full text │
+
+     └─────────────────┘
+
+
+Metadata: The Secret Weapon
+
+Metadata filtering is often more impactful than improving your embedding model. Store rich metadata with each chunk and use it to narrow search before vector similarity kicks in.
+
+Essential metadata fields to store:    source (file path, URL, API endpoint),    doc_type (pdf, html, code, chat), title and section_heading, date_created and date_modified, author, language, chunk_index (position within document), parent_id (for parent-child chunking), and any domain-specific fields (product_name, department, customer_tier, etc.).
+
+# Example: Qdrant upsert with rich metadata
+
+from qdrant_client.models import PointStruct
+
+points = [
+
+PointStruct(
+
+id=chunk_id,
+
+vector=embedding,
+
+payload={
+
+"text": chunk_text,
+
+"source": "docs/api-reference.md",
+
+"doc_type": "documentation",
+
+"section": "Authentication",
+
+"date_modified": "2025-03-15",
+
+"product": "API v3",
+
+"language": "en"
+
+}
+
+)
+
+]
+
+# Query with metadata filter
+
+results = client.search(
+
+collection_name="knowledge_base",
+
+query_vector=query_embedding,
+
+query_filter=Filter(
+
+must=[
+
+FieldCondition(key="product", match=MatchValue(value="API v3")),
+
+FieldCondition(key="language", match=MatchValue(value="en"))
+
+]
+
+),
+
+limit=10
+
+)
+
+Structuring Knowledge Bases
+
+Collection Strategy
+
+Don't dump everything into one collection. Organize by access pattern: one collection per product, per language, or per document type. Use metadata filtering within collections for finer granularity.
+
+Hierarchical Indexing
+
+For large knowledge bases, use a two-level approach: first, a "summary index" with document-level embeddings to identify which documents are relevant, then a "chunk index" within those documents for precise retrieval. This dramatically reduces the search space.
+
+Incremental Indexing and Updates
+
+Documents change. You need a strategy for keeping your index fresh without re-embedding everything.
+
+Content hashing: Hash each chunk's text. On re-index, only re-embed chunks whose hash has changed. This avoids redundant API calls.
+
+Upsert pattern: Use deterministic chunk IDs (e.g., sha256(source_path + chunk_index)). Upsert replaces existing vectors with the same ID, keeping your index clean.
+
+Soft delete + TTL: Mark stale chunks as deleted (metadata flag) rather than immediately removing them. Periodically garbage-collect. This prevents serving stale results during re-indexing.
+
+Change detection: For web sources, use Last-Modified or ETag headers. For file systems, use mtime. For databases, use updated_at timestamps. For APIs, use webhooks.
+
+08
+
+System Design for Production RAG
+
+Architecture Overview
+
+  ┌─────────────────────────────────────────────────  ────────────┐
+
+│ PRODUCTION RAG SYSTEM │
+
+  │    │
+
+  Users ─────▶ ┌──────┐ │ ┌──────────┐ ┌───────────┐ ┌──────────┐ ┌────────────┐ │
+
+│ API │─────▶│ Query │─▶│ Cache │─▶│ Retrieval│─▶│ Rerank │ │
+
+│ GW │ │ │ Router │ │ Layer │ │ Engine │ │ + Filter │ │
+
+  └──────┘ │ └──────────┘ └─────┬─────┘ └────┬─────┘ └─────┬──────┘ │
+
+  │ │ │ │ │
+
+  │ ┌───────▼───────┐ │ │ │
+
+│ │ Redis/ │ │ │ │
+
+│ │ Memcached │ │ ▼ │
+
+  │ └───────────────┘ │ ┌─────────────────┐ │
+
+│ │ │ Prompt Builder │ │
+
+  │ ┌──────────────────────────┐ │ │ (template + │ │
+
+│ │ Vector Database │◀─────┘ │ context + │ │
+
+│ │ (Qdrant / Pinecone) │ │ guardrails) │ │
+
+  │ └──────────────────────────┘ └───────┬─────────┘ │
+
+  │    │ │
+
+  │ ┌──────────────────────────┐ ┌───────▼─────────┐ │
+
+│ │ Indexing Pipeline │ │ LLM │ │
+
+│ │ (async workers) │ │ (Claude/GPT) │ │
+
+  │ └──────────────────────────┘ └───────┬─────────┘ │
+
+  │    │ │
+
+  │ ┌──────────────────────────┐ ┌───────▼─────────┐ │
+
+│ │ Observability │ │ Response │ │
+
+│ │ (logs, metrics, traces) │ │ + Citations │ │
+
+  │ └──────────────────────────┘ └─────────────────┘ │
+
+  └─────────────────────────────────────────────────  ─────────────┘
+
+
+Latency Budget
+
+A typical RAG request should complete in under 3 seconds for a good user experience. Here's how the budget typically breaks down:
+
+Stage Target Latency Optimization
+
+Query embedding 20–50ms Batch queries, use smaller embedding model for queries
+
+Vector search 10–50ms HNSW index, in-memory, metadata pre-filtering
+
+Reranking 100–300ms Limit to top-20 candidates, use lighter reranker for high-QPS
+
+LLM generation 1–3s (streaming) Stream first token in <500ms, use smaller model for simple queries
+
+Total 1.5–3.5s Cache, model routing, async where possible
+
+Caching Strategies
+
+Semantic cache: Hash the query embedding (or a quantized version) and cache the full response. If a semantically identical query comes in, return the cached result. Tools like GPTCache implement this. Be careful with cache invalidation when your knowledge base updates.
+
+Embedding cache: Cache computed embeddings for frequently queried text. Saves embedding API costs.
+
+Chunk cache: After retrieval, cache the (query_hash → retrieved_chunks) mapping. Even if the LLM response isn't cached, you save the retrieval latency on repeated queries.
+
+Cost Optimization
+
+Model routing: Use a small classifier to route simple queries to a cheaper/faster model (e.g., Haiku) and complex queries to a more capable model (e.g., Sonnet or Opus). This can cut costs by 60–80% without meaningful quality loss.
+
+Context packing: Don't blindly stuff all top-K chunks into the prompt. Dynamically select the minimum context needed. Fewer input tokens = lower cost = faster response.
+
+Evaluation Metrics
+
+What to Measure Metric How
+
+Retrieval quality Recall@K, MRR, NDCG Does the correct chunk appear in top-K results?
+
+Answer correctness Factual accuracy (LLM-as-judge) Use a strong LLM to grade answers against ground truth
+
+Answer groundedness Faithfulness score Is the answer supported by the retrieved chunks? (RAGAS framework)
+
+Answer relevance Relevance score Does the answer actually address the user's question?
+
+End-to-end User satisfaction, task completion rate A/B testing, thumbs-up/down, resolution rate
+
+Evaluation is Non-Negotiable
+
+The #1 mistake in production RAG is not building an evaluation pipeline. Without eval, you're flying blind. Build a test set of 50–100 (question, expected_answer, relevant_source) triples. Run automated evals on every change to your chunking, embedding, or retrieval logic. Use frameworks like RAGAS, DeepEval, or Phoenix (Arize).
+
+09
+
+Hands-On Code & Tools
+
+Minimal RAG Pipeline in Python
+
+# pip install openai chromadb langchain-text-splitters
+
+import openai
+
+import chromadb
+
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+# --- 1. Initialize ---
+
+client = openai. OpenAI()
+
+chroma = chromadb. Client()
+
+collection = chroma.create_collection("my_docs")
+
+# --- 2. Chunk documents ---
+
+splitter = RecursiveCharacterTextSplitter(
+
+chunk_size=500,
+
+chunk_overlap=50,
+
+separators=["\n\n", "\n", ". ", " "]
+
+)
+
+documents = ["Your document text here..."] # Load from files
+
+chunks = []
+
+for doc in documents:
+
+chunks.extend(splitter.split_text(doc))
+
+# --- 3. Embed and store ---
+
+for i, chunk in enumerate(chunks):
+
+response = client.embeddings.create(
+
+model="text-embedding-3-small",
+
+input=chunk
+
+)
+
+collection.add(
+
+ids=[f"chunk_{i}"],
+
+embeddings=[response.data[0].embedding],
+
+documents=[chunk],
+
+metadatas=[{"source": "doc1", "chunk_index": i}]
+
+)
+
+# --- 4. Query ---
+
+def rag_query(question: str, top_k: int = 5) -> str:
+
+# Embed the question
+
+q_emb = client.embeddings.create(
+
+model="text-embedding-3-small",
+
+input=question
+
+).data[0].embedding
+
+
+# Retrieve relevant chunks
+
+results = collection.query(
+
+query_embeddings=[q_emb],
+
+n_results=top_k
+
+)
+
+
+context = "\n\n---\n\n".join(results["documents"][0])
+
+
+# Generate answer
+
+response = client.chat.completions.create(
+
+model="claude-sonnet-4-20250514", # or gpt-4o
+
+messages=[
+
+{"role": "system", "content": (
+
+"Answer based on the provided context. "
+
+"If the context doesn't contain the answer, say so. "
+
+"Cite the relevant section."
+
+)},
+
+{"role": "user", "content": (
+
+f"Context:\n{context}\n\n"
+
+f"Question: {question}"
+
+)}
+
+]
+
+)
+
+
+return response.choices[0].message.content
+
+# --- 5. Use it ---
+
+answer = rag_query("How do I reset my API key?")
+
+print(answer)
+
+Node.js Equivalent
+
+// npm install openai chromadb
+
+import OpenAI from 'openai';
+
+import { ChromaClient } from 'chromadb';
+
+const openai = new OpenAI();
+
+const chroma = new ChromaClient();
+
+async function buildIndex(chunks) {
+
+const collection = await chroma.getOrCreateCollection({ name: 'my_docs' });
+
+
+// Embed in batches
+
+const batchSize = 100;
+
+for (let i = 0; i < chunks.length; i += batchSize) {
+
+const batch = chunks.slice(i, i + batchSize);
+
+const response = await openai.embeddings.create({
+
+model: 'text-embedding-3-small',
+
+input: batch
+
+});
+
+
+await collection.add({
+
+ids: batch.map((_, j) => `chunk_${i + j}`),
+
+embeddings: response.data.map(d => d.embedding),
+
+documents: batch
+
+});
+
+}
+
+return collection;
+
+}
+
+async function ragQuery(collection, question) {
+
+const qEmb = await openai.embeddings.create({
+
+model: 'text-embedding-3-small',
+
+input: question
+
+});
+
+
+const results = await collection.query({
+
+queryEmbeddings: [qEmb.data[0].embedding],
+
+nResults: 5
+
+});
+
+
+const context = results.documents[0].join('\n\n---\n\n');
+
+
+const response = await openai.chat.completions.create({
+
+model: 'gpt-4o',
+
+messages: [
+
+{ role: 'system', content: 'Answer based on the provided context. Cite sources.' },
+
+{ role: 'user', content: `Context:\n${context}\n\nQuestion: ${question}` }
+
+]
+
+});
+
+
+return response.choices[0].message.content;
+
+}
+
+Recommended Tools & Frameworks
+
+Category Tool When to Use
+
+Orchestration LangChain, LlamaIndex Rapid prototyping, standard RAG patterns. LlamaIndex is more RAG-focused; LangChain is broader.
+
+Orchestration (lightweight) Custom code, Haystack Production systems where you want full control over the pipeline
+
+Vector DB ChromaDB → Qdrant / Pinecone Start with Chroma locally, graduate to managed for production
+
+Embedding OpenAI, Cohere, or self-hosted BGE/Nomic API for convenience, self-hosted for cost/privacy at scale
+
+Reranking Cohere Rerank, bge-reranker, Jina Always add a reranker in production; the quality lift is significant
+
+Evaluation RAGAS, DeepEval, Arize Phoenix RAGAS for open-source evals; Phoenix for observability + evals
+
+Document Parsing Unstructured.io, LlamaParse, Docling When you have complex PDFs, tables, images to extract text from
+
+Observability LangSmith, Arize, Langfuse Tracing, debugging, and monitoring production RAG pipelines
+
+10
+
+Learning Roadmap
+
+1
+
+Weeks 1–2: Foundations
+
+Understand tokenization (try tiktoken), play with the OpenAI/Anthropic API, build a simple chatbot. Read "Attention Is All You Need" (the transformer paper). Run a local LLM with Ollama.
+
+2
+
+Weeks 3–4: Embeddings & Vector Search
+
+Build a semantic search engine over your own documents (notes, bookmarks, articles). Use ChromaDB. Experiment with different embedding models and chunk sizes. Measure recall manually.
+
+3
+
+Weeks 5–6: RAG Pipeline
+
+Build a full RAG Q&A system over a real dataset (product docs, Wikipedia subset, legal documents). Add metadata filtering. Implement hybrid search (BM25 + vector). Add a reranker.
+
+4
+
+Weeks 7–8: Evaluation & Optimization
+
+Build an evaluation dataset (50+ question-answer pairs). Set up RAGAS or DeepEval. Iterate on chunking strategy, embedding model, and prompt template. Measure and improve retrieval recall and answer faithfulness.
+
+5
+
+Weeks 9–10: Production Hardening
+
+Add caching (Redis), error handling, streaming responses, rate limiting. Deploy to cloud with Docker. Add observability (Langfuse/Phoenix). Implement incremental indexing.
+
+6
+
+Weeks 11–12: Advanced Topics
+
+Explore agentic RAG (multi-step retrieval, query decomposition), fine-tuning embedding models on your domain, GraphRAG (knowledge graphs + vector search), multi-modal RAG (images + text).
+
+Project Ideas (Increasing Difficulty)
+
+Beginner: Personal knowledge base Q&A (index your notes/bookmarks, ask questions)
+
+Intermediate: Multi-source support bot (index docs + FAQ + past tickets, handle follow-ups)
+
+Advanced: Code-aware assistant (index a codebase with AST-chunking, answer architecture questions with citations to specific files/functions)
+
+Expert: Agentic research assistant (decomposes complex questions, searches multiple knowledge bases, synthesizes findings, generates cited reports)
+
+11
+
+Common Mistakes & Resources
+
+Mistakes to Avoid
+
+# Mistake Why It Hurts What to Do Instead
+
+1 No evaluation pipeline You can't improve what you can't measure Build a test set from day one. Automate eval on every change.
+
+2 One-size-fits-all chunks PDFs, code, and chat logs need different strategies Match chunking strategy to document type. Test different sizes.
+
+3 Ignoring metadata Vector search alone can't distinguish "API v2" from "API v3" Store rich metadata. Use pre-filtering before vector search.
+
+4 Skipping the reranker Top-K from vector search often includes 30–50% irrelevant results Always add a reranker in production. The quality lift justifies the latency.
+
+5 Stuffing too much context LLMs get confused by irrelevant context ("lost in the middle" problem) Be selective. 3–5 highly relevant chunks beat 20 loosely relevant ones.
+
+6 No observability When quality degrades, you have no idea why Log queries, retrieved chunks, LLM inputs/outputs. Trace end-to-end.
+
+7 Starting with a framework LangChain/LlamaIndex abstract away understanding Build your first RAG pipeline from scratch. Use frameworks later for productivity.
+
+8 Wrong embedding model for the job Using a general-purpose model for code, or a monolingual model for multilingual content Benchmark 2–3 embedding models on your actual data before committing.
+
+9 Ignoring the prompt A poorly written system prompt wastes good retrieval Iterate on your prompt as much as your retrieval pipeline. Include instructions for citing sources and admitting uncertainty.
+
+10 Not handling updates Your index becomes stale and serves wrong answers Build incremental indexing from the start. Use content hashing.
+
+Recommended Resources
+
+Papers (Read in Order)
+
+1. "Attention Is All You Need" (Vaswani et al., 2017) — The transformer paper. Read it at least twice.
+
+2. "BERT: Pre-training of Deep Bidirectional Transformers" (Devlin et al., 2018) — Foundational for understanding encoder models and embeddings.
+
+3. "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks" (Lewis et al., 2020) — The original RAG paper.
+
+4. "Sentence-BERT" (Reimers & Gurevych, 2019) — How to make embeddings for semantic search.
+
+5. "Efficient and Robust Approximate Nearest Neighbor Search Using HNSW Graphs" (Malkov & Yashunin, 2018) — The HNSW algorithm.
+
+6. "From Local to Global: A Graph RAG Approach" (Microsoft, 2024) — GraphRAG for structured knowledge.
+
+Courses
+
+Andrej Karpathy's "Neural Networks: Zero to Hero" (YouTube) — Builds intuition from scratch, culminating in a GPT implementation.
+
+DeepLearning. AI's "Building and Evaluating Advanced RAG" — Practical RAG course with LlamaIndex.
+
+fast.ai's "Practical Deep Learning" — Excellent top-down approach to deep learning.
+
+Tools to Master
+
+tiktoken (tokenization), sentence-transformers (embeddings), chromadb → qdrant (vector DB), ragas (evaluation), langfuse (observability), unstructured (document parsing), ollama (local LLMs).
+
+The Golden Rule
+
+Build things. The gap between "understanding RAG conceptually" and "building a production RAG system that actually works" is enormous. Every concept in this guide becomes 10× clearer when you implement it, hit the edge cases, and debug them yourself.
