@@ -1,0 +1,45 @@
+Python & Backend Frameworks
+
+Core Python concepts (data structures, OOP, decorators, async basics)
+Pydantic (data validation, models, serialization)
+FastAPI / Django / Flask fundamentals
+Building REST APIs
+Request/response lifecycle
+Dependency injection in FastAPI
+Error handling and validation
+
+
+Prompt Engineering
+
+Prompt design principles
+Chain of Thought prompting
+Tree of Thoughts reasoning
+Improving reasoning and response quality
+
+
+Machine Learning Basics
+
+Types of learning methods
+Basics of ANN (Artificial Neural Network)
+Model building workflow
+Training, validation, and inference concepts
+Fine tunning
+NLP
+
+
+AI / LLM Engineering
+
+RAG (Retrieval Augmented Generation) concepts
+Vector embeddings
+Chunking strategies
+Vector search
+Reranking techniques
+Page-Index (https://github.com/VectifyAI/PageIndex)
+
+
+
+Model Context Protocol (MCP)
+
+Understanding MCP tools
+MCP servers
+How AI systems interact with tools via MCP
