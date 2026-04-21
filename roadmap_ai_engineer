@@ -1,0 +1,195 @@
+https://docs.google.com/document/d/15hrzPsWE_kkiqXO0KNB-DX916ibvtJtHjGJ8YloL5QU/edit?usp=sharing
+
+
+
+per week 8 hours3:39 PMClaude responded: Got it — 8 hours per week changes everything.Got it — 8 hours per week changes everything. Let me rebuild this honestly.
+The Real Talk First
+At 8 hrs/week, you're looking at ~400 hours/year. To become a genuinely employable AI engineer by 2028 (roughly 2 years from now = ~800 hours total), this is tight but doable if you stay ruthlessly focused on what matters and cut everything that doesn't.
+This means:
+
+No learning ML from scratch math-heavy. You don't have the hours.
+Skip Coursera deep-dives that take 60 hours. You need applied skills.
+Build projects from Week 3 onward. Portfolio > certificates in 2028.
+Bet on the "AI Engineer" role (building with models), not "ML Researcher" (training models). The former is where 90% of jobs will be.
+
+Before I give you the roadmap, one quick question so I can tailor it properly:Once you pick those two, I'll give you a week-by-week roadmap that fits 8 hours/week — specific resources, specific projects, and what to skip. But let me also give you the high-level structure right now so you can see the shape of it:
+
+The 2-Year Roadmap Skeleton (8 hrs/week)
+Year 1 — Foundations + First Real Projects (~400 hrs)
+
+Months 1–2: Python fluency + Git/GitHub + basic data handling (pandas, APIs, JSON)
+Months 3–4: Core ML intuition (not from scratch — use fast.ai or Andrew Ng's short course). You need to understand models, not rebuild them.
+Months 5–6: LLM fundamentals — prompting, the Anthropic/OpenAI APIs, embeddings, tokens, context windows. Build your first chatbot.
+Months 7–8: RAG (Retrieval-Augmented Generation) — vector DBs, chunking, hybrid search. Build a RAG app over your own documents.
+Months 9–10: Agents & tool use — function calling, multi-step workflows, agent frameworks. Build an agent that does something real.
+Months 11–12: Evals & production basics — how to measure if your AI actually works, deployment (FastAPI, Docker, one cloud provider).
+
+Year 2 — Depth + Portfolio + Job-Ready (~400 hrs)
+
+Months 13–15: Pick a depth area (fine-tuning, agent systems, or production infra) and go deep.
+Months 16–18: Build 2 portfolio-grade projects that solve real problems. These are your interview material.
+Months 19–21: System design for AI, cost optimization, latency, observability. This is what separates hobbyists from engineers.
+Months 22–24: Contribute to open source, write 3–5 technical blog posts, start applying. The job search itself takes 2–3 months.
+
+
+Why This Will Still Matter in 2028
+Three bets I'm making with this roadmap:
+
+Models get better, but the hard problems move up the stack. Evals, agent reliability, context engineering, and domain integration will be more valuable in 2028, not less. The people who win aren't the ones who train models — they're the ones who make AI systems actually work in messy real-world conditions.
+"Vibe coding" AI apps is easy; engineering them is not. Anyone can wire up an API call in 2028. Knowing how to debug a failing agent, design an eval suite, manage token costs at scale, and ship something that doesn't hallucinate — that's the moat.
+Fundamentals > frameworks. LangChain might die. LlamaIndex might die. The concepts (retrieval, grounding, tool use, evals) will not. This roadmap teaches concepts through whatever framework is current.
+
+
+Pick your two answers above and I'll give you the detailed week-by-week plan with specific resources, projects, and what to skip. Sound good?You said: Q: What's your current background?Q: What's your current background?
+A: Know some Python/programmingQ: What type of AI engineer role excites you most for 2028?
+A: Build AI products/apps (agents, RAG, chatbots)3:41 PMClaude responded: Perfect — that's actually the sweet spot.Perfect — that's actually the sweet spot. Knowing some Python saves you 2-3 months, and "AI products/apps" is the highest-demand role for 2028. Here's your detailed plan.
+The 8-Hours-a-Week AI Engineer Roadmap (2026–2028)
+How to Spend Your 8 Hours Every Week
+This split matters more than you think. Stick to it:
+
+5 hours — Building (projects, code, hands-on)
+2 hours — Learning (courses, docs, papers, videos)
+1 hour — Reading the field (newsletters, Twitter/X, blogs, release notes)
+
+The 1-hour "reading the field" habit is non-negotiable. AI moves fast. Engineers who don't track it become obsolete in 18 months. Subscribe to: The Batch (Andrew Ng), Latent Space, Simon Willison's blog, and follow Anthropic/OpenAI release notes.
+
+PHASE 1 — Python & Dev Fundamentals (Weeks 1–6, ~48 hours)
+You said you know some Python. We're upgrading that to professional Python, because sloppy code is the #1 reason junior AI engineers get filtered out.
+What to learn:
+
+Python deep: type hints, dataclasses, async/await, context managers, decorators, virtual environments (uv is the modern tool, skip venv/conda)
+Git & GitHub: branches, PRs, merge conflicts, writing good commit messages
+Command line comfort: bash basics, environment variables, SSH
+HTTP & APIs: REST, status codes, JSON, authentication headers
+One real skill: building and calling APIs with httpx or requests
+
+Resources (pick one, don't shop around):
+
+Python Crash Course (3rd ed.) by Eric Matthes — chapters 1-11, skip the games
+Corey Schafer's Python YouTube playlist for gaps
+git — "Learn Git Branching" (interactive, free, 2 hours)
+
+Project (Week 5–6): Build a CLI tool that takes a URL, fetches the page, and saves a cleaned version to disk. Push it to GitHub with a real README. This is your first portfolio piece.
+Skip: Leetcode. Data structures deep-dives. Django. Flask. You don't need them yet.
+
+PHASE 2 — LLM Fundamentals & Your First AI App (Weeks 7–14, ~64 hours)
+This is where you start being an AI engineer. Notice I skipped "learn ML from scratch." At 8 hrs/week, you cannot afford a 3-month detour into gradient descent. You'll pick up ML intuition along the way.
+What to learn:
+
+How LLMs actually work at a conceptual level (tokens, context windows, temperature, top-p, sampling) — not the math, the mental model
+The Anthropic API and/or OpenAI API — reading the docs cover to cover is genuinely worth it
+Prompt engineering that works: system prompts, few-shot, structured output, XML vs JSON prompting
+Tool use / function calling — this is the foundation of agents
+Streaming responses and handling errors
+Token counting and cost management
+
+Resources:
+
+Anthropic's prompt engineering docs (the official ones at docs.claude.com)
+Karpathy's "Intro to LLMs" YouTube video (1 hour, watch twice)
+Karpathy's "Let's build GPT from scratch" — watch it once for intuition, don't try to replicate
+Building LLM Apps course by DeepLearning.AI (the short courses, each ~1 hour)
+
+Projects (ship 2):
+
+Weeks 9–11: A CLI chatbot with conversation memory and streaming. Add a system prompt that gives it a real purpose (study buddy, code reviewer, whatever).
+Weeks 12–14: A structured-output app — feed it messy input (emails, receipts, meeting notes), get clean JSON out. This shows you understand production LLM work.
+
+Skip: LangChain for now. Seriously. Learn the raw APIs first — frameworks make sense only after you understand what they're abstracting.
+
+PHASE 3 — RAG: The Skill That Pays Rent (Weeks 15–24, ~80 hours)
+Retrieval-Augmented Generation is the single most employable skill right now. Nearly every company wants "chat with our docs." Master this phase and you can start freelancing by month 6.
+What to learn:
+
+Embeddings: what they are, how to generate them, how similarity search works
+Chunking strategies (this is where most RAG systems fail — chunking is an art)
+Vector databases: start with Chroma (local, free), then learn Pinecone or Qdrant
+Hybrid search: combining keyword (BM25) + semantic search
+Reranking with cross-encoders
+Context window management and the "lost in the middle" problem
+Evaluation: how do you actually know if your RAG is good? (Hint: this is what separates junior from mid-level)
+
+Resources:
+
+"RAG From Scratch" series by Langchain on YouTube (watch for concepts, not the framework)
+Jason Liu's writing on RAG (he's the best practical source alive)
+Anthropic's Contextual Retrieval blog post
+
+Project (Weeks 20–24): Build "Chat with your PDFs" — but make it good. Handle multi-document queries, cite sources with page numbers, add a simple eval set of 20 questions where you measure accuracy. Deploy it as a web app (Streamlit is fine for now). This project alone, done well, can get you freelance work.
+
+PHASE 4 — Agents & Tool Use (Weeks 25–36, ~96 hours)
+Agents are the 2028 play. By then, "build an agent for X" will be as common as "build a website for X" is today. The engineers who master agent reliability now will be extremely valuable.
+What to learn:
+
+The agent loop: plan → act → observe → repeat
+Tool/function calling at a deep level — schemas, error handling, parallel tool calls
+Multi-step reasoning, self-correction, and when to let the model decide vs constrain it
+Agent frameworks: try Anthropic's Claude Agent SDK and/or OpenAI's Agents SDK
+MCP (Model Context Protocol) — this will matter a lot by 2028
+Handling failures: retries, fallbacks, guardrails
+Cost/latency tradeoffs in multi-step agents
+
+Resources:
+
+Anthropic's "Building Effective Agents" blog post (read it 3 times)
+The Claude Agent SDK docs
+Simon Willison's blog posts on agents (brutally practical)
+
+Projects (ship 2):
+
+Weeks 28–31: A research agent — give it a topic, it searches the web, synthesizes 3+ sources, produces a report with citations.
+Weeks 32–36: A "real job" agent — pick something annoying in your actual life (processing invoices, sorting emails, monitoring prices) and build an agent that does it autonomously. This project becomes your interview showcase.
+
+
+PHASE 5 — Production, Evals & Deployment (Weeks 37–48, ~96 hours)
+This is the phase that converts you from "can build demos" to "can ship software." Most self-taught AI people skip this. Don't.
+What to learn:
+
+FastAPI for building real AI backends
+Docker basics (enough to containerize your app)
+One cloud: pick AWS, GCP, or Railway/Render for simplicity. Don't learn all three.
+Observability: logging LLM calls, tracking costs, tracing multi-step flows (LangSmith, Langfuse, or roll your own)
+Evaluations — this is the core skill of senior AI engineers. How do you prove your AI works? LLM-as-judge, golden datasets, regression testing
+Security: prompt injection, data leakage, API key management
+Streaming in production, handling long-running tasks, background jobs
+
+Resources:
+
+Hamel Husain's writing on evals (the definitive source)
+FastAPI official docs (they're excellent, just read them)
+Designing Machine Learning Systems by Chip Huyen — read the chapters on monitoring and deployment
+
+Project (Weeks 44–48): Take your best project from Phase 3 or 4 and productionize it. Add proper evals, logging, a real frontend (or polished Streamlit), deploy it to a real URL, write a blog post about the engineering decisions. This is your capstone.
+
+YEAR 2 — Depth, Portfolio, and Getting Hired (Weeks 49–104, ~400 hours)
+Year 1 made you competent. Year 2 makes you employable.
+Weeks 49–64 — Pick a depth area and go deep. Options:
+
+Agent systems (if you loved Phase 4) — multi-agent, long-running agents, computer use
+RAG at scale — enterprise search, structured + unstructured data, graph RAG
+Fine-tuning — LoRA, distillation, when to fine-tune vs prompt (usually prompt wins; knowing when it doesn't is valuable)
+Voice/multimodal — this is a sleeper area for 2028
+
+Weeks 65–80 — Build two portfolio-grade projects. Not tutorials. Not toys. Real things that solve real problems, with proper evals, deployment, and writeups. These are your job interviews.
+Weeks 81–92 — Go public.
+
+Write 5 technical blog posts (one per month). Topics: lessons from your projects, deep dives into things you learned, opinions on industry debates
+Contribute to an open source AI project (even tiny PRs to docs count)
+Post your projects on X, Hacker News, relevant subreddits
+Start a GitHub that screams "hire me"
+
+Weeks 93–104 — Job search.
+
+Apply to 5 roles a week, not 50. Quality beats volume.
+Target: "AI Engineer," "ML Engineer (Applied)," "Forward Deployed Engineer," "AI Developer." Avoid "ML Research" and "Data Scientist" unless you do extra math.
+Use your projects as interview material. "Walk me through a project" is where you win.
+Also look at AI-forward startups — they hire on demonstrated ability over credentials more than big tech does.
+
+
+The Hard Truths
+A few things nobody will tell you but I will:
+8 hrs/week is the floor, not the target. If you can find a 9th or 10th hour on weekends, take it. The difference between 8 and 12 hrs/week is the difference between "employable in 2 years" and "employable in 15 months."
+Consistency beats intensity. One hour every day beats 8 hours on Sunday. Your brain needs sleep to consolidate this stuff.
+You will feel behind. Ignore that feeling. In 2026, everyone on Twitter seems to already know everything. They don't. They're performing. Keep your head down.
+Build in public from month 3. Even bad projects, posted publicly with honest writeups, build a reputation. Most people wait until their work is "ready." It never is.
+By 2028, "I used ChatGPT to help me build this" is table stakes. Using Claude Code / Cursor / Copilot aggressively is expected. The engineers who ship fast with AI tools will out-earn the ones who don't — start practicing this from Phase 2 onward.
