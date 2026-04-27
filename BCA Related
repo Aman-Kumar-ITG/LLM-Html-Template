@@ -1,0 +1,88 @@
+Number System Conversions — Complete Guide
+The four systems
+SystemBaseDigits usedDecimal100–9Binary20, 1Octal80–7Hexadecimal160–9, A(10), B(11), C(12), D(13), E(14), F(15)
+A key insight before we start: binary, octal, and hex are all powers of 2 (2¹, 2³, 2⁴). That's why converting between them is easy — you just regroup bits. Decimal is base 10, which doesn't fit that pattern, so any conversion involving decimal needs actual arithmetic.
+There are 6 pairs and 12 directions in total. Let's go through them.
+
+1. Decimal → Binary (divide by 2)
+Repeatedly divide by 2, collect remainders, then read the remainders from bottom to top.
+Example: 25 → binary
+25 ÷ 2 = 12 remainder 1
+12 ÷ 2 = 6  remainder 0
+ 6 ÷ 2 = 3  remainder 0
+ 3 ÷ 2 = 1  remainder 1
+ 1 ÷ 2 = 0  remainder 1
+Read bottom-up: 25 = 11001₂
+2. Decimal → Octal (divide by 8)
+Same idea, but divide by 8.
+Example: 100 → octal
+100 ÷ 8 = 12 remainder 4
+ 12 ÷ 8 = 1  remainder 4
+  1 ÷ 8 = 0  remainder 1
+Read bottom-up: 100 = 144₈
+3. Decimal → Hexadecimal (divide by 16)
+Divide by 16. Remainders 10–15 become A–F.
+Example: 255 → hex
+255 ÷ 16 = 15 remainder 15 → F
+ 15 ÷ 16 = 0  remainder 15 → F
+255 = FF₁₆
+
+4. Binary → Decimal (multiply by powers of 2)
+Each bit's value = bit × 2^(position from right, starting at 0). Add them up.
+Example: 11001₂
+1×2⁴ + 1×2³ + 0×2² + 0×2¹ + 1×2⁰
+= 16 + 8 + 0 + 0 + 1
+= 25
+5. Octal → Decimal (powers of 8)
+Example: 144₈
+1×8² + 4×8¹ + 4×8⁰ = 64 + 32 + 4 = 100
+6. Hexadecimal → Decimal (powers of 16)
+Replace A–F with 10–15 first.
+Example: 2AF₁₆
+2×16² + 10×16¹ + 15×16⁰ = 512 + 160 + 15 = 687
+
+The shortcut conversions (no decimal needed)
+This is where things get fast. Because 8 = 2³ and 16 = 2⁴, you just group bits.
+7. Binary ↔ Octal (groups of 3)
+Binary → Octal: Group bits in threes from the right, pad left with zeros if needed, convert each group.
+Example: 11001₂ → group: 011 001 → 3, 1 → 31₈
+Octal → Binary: Each octal digit becomes exactly 3 bits.
+Example: 752₈ → 7=111, 5=101, 2=010 → 111 101 010₂
+8. Binary ↔ Hexadecimal (groups of 4)
+Binary → Hex: Group bits in fours from the right, pad left with zeros, convert each group.
+Example: 11001₂ → group: 0001 1001 → 1, 9 → 19₁₆
+Hex → Binary: Each hex digit becomes exactly 4 bits.
+Example: 2AF₁₆ → 2=0010, A=1010, F=1111 → 0010 1010 1111₂
+Reference table you'll want to memorize:
+0=0000  4=0100  8=1000  C=1100
+1=0001  5=0101  9=1001  D=1101
+2=0010  6=0110  A=1010  E=1110
+3=0011  7=0111  B=1011  F=1111
+9. Octal ↔ Hexadecimal (go through binary)
+There's no clean direct conversion because 8 and 16 aren't powers of each other in a useful way. The trick: convert through binary.
+Octal → Hex: octal → binary (3 bits each) → regroup as 4 bits → hex
+Example: 752₈
+
+→ 111 101 010 (binary)
+→ regroup in 4s from right: 0001 1110 1010
+→ 1, E, A → 1EA₁₆
+
+Hex → Octal: hex → binary (4 bits each) → regroup as 3 bits → octal
+Example: 1EA₁₆
+
+→ 0001 1110 1010
+→ regroup in 3s from right: 000 111 101 010
+→ 0, 7, 5, 2 → 752₈
+
+
+Quick verification example
+The number 25 in all four systems:
+
+Decimal: 25
+Binary: 11001
+Octal: 31
+Hex: 19
+
+You can plug any of these into the conversion methods above and confirm they all give 25 back.
+Summary of strategies
+To go from any base to any other, you have two reliable paths: either go through decimal (always works), or go through binary (fast for binary/octal/hex). For everyday use, decimal-to-others uses repeated division, others-to-decimal uses positional weights, and binary/octal/hex conversions just regroup bits in 3s or 4s.
