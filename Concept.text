@@ -38,6 +38,25 @@ Page-Index (https://github.com/VectifyAI/PageIndex)
 
 
 
+
+
+
+Here are some of the best places to practice Git and GitHub, depending on your learning style:
+Interactive, browser-based practice
+
+Learn Git Branching (learngitbranching.js.org) — hands-down the best visual tool for understanding branching, merging, rebasing, and cherry-picking. You see the commit graph update as you type commands.
+GitHub Skills (skills.github.com) — official GitHub courses run as actual repos, so you practice pull requests, branches, and workflows on real GitHub.
+Oh My Git! — a free game that teaches Git through puzzles with a visualized internal state.
+Tutorials with hands-on exercises
+
+Atlassian Git Tutorials — clear explanations with diagrams, especially good for understanding why commands work the way they do.
+The Pro Git book (git-scm.com/book) — free, comprehensive, and the closest thing to an official reference.
+
+Practice on real projects
+Create a few throwaway repos on your own GitHub account and deliberately break things — force pushes, conflicting merges, detached HEAD, reverting commits. Recovering from messes is where real understanding comes from.
+Contribute to beginner-friendly open source via good-first-issue.com or the good-first-issue topic on GitHub. This teaches you the actual collaboration flow: forking, branching, PRs, code review.
+
+My suggested order if you're starting fresh: Learn Git Branching first (1–2 hours) to build intuition, then GitHub Skills for the collaboration side, then start using Git on your own small projects daily. The daily use is what actually makes it stick.
 Model Context Protocol (MCP)
 
 Understanding MCP tools
