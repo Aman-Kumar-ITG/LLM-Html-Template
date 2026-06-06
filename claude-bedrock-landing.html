@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Claude × Amazon Bedrock — The Production AI Course</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+--bg:#0A0A0D; --bg2:#0F0F14; --bg3:#14141B; --ink:#F4F1EA; --ink-dim:#9E9A91;
+--accent:#E8895A; --accent2:#D97757; --accent3:#F2A878; --cool:#6E8CA8; --cool2:#8FA8C0;
+--line:rgba(244,241,234,.10); --line2:rgba(244,241,234,.18);
+--serif:'Fraunces',Georgia,serif; --sans:'Space Grotesk',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+--ease:cubic-bezier(.16,1,.3,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+html.lenis{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!important}
+.lenis.lenis-smooth [data-lenis-prevent]{overscroll-behavior:contain}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);overflow-x:hidden;line-height:1.5;cursor:none}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--accent);color:#0A0A0D}
+.wrap{width:min(1340px,92vw);margin-inline:auto}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.28em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:.7em}
+.eyebrow::before{content:"";width:34px;height:1px;background:var(--accent);display:inline-block}
+.secnum{font-family:var(--mono);font-size:.8rem;color:var(--ink-dim);letter-spacing:.2em}
+h1,h2,h3{font-family:var(--serif);font-weight:500;line-height:1.02;letter-spacing:-.02em}
+.gradtext{background:linear-gradient(100deg,var(--accent3),var(--accent),var(--cool2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;background-size:200% auto;animation:gradmove 6s linear infinite}
+@keyframes gradmove{to{background-position:200% center}}
+.btn-magnetic{position:relative;display:inline-flex;align-items:center;gap:.8em;padding:1.15em 2.1em;border-radius:60px;background:var(--accent);color:#0A0A0D;font-family:var(--sans);font-weight:600;font-size:1rem;will-change:transform;transition:background .4s var(--ease),box-shadow .4s var(--ease);box-shadow:0 0 0 0 rgba(232,137,90,.4)}
+.btn-magnetic:hover{background:var(--ink);box-shadow:0 14px 50px -12px rgba(232,137,90,.6)}
+.btn-magnetic .lbl{position:relative;z-index:2}
+.btn-ghost{border:1px solid var(--line2);background:transparent;color:var(--ink);box-shadow:none}
+.btn-ghost:hover{background:var(--ink);color:#0A0A0D;box-shadow:none}
+#cursor{position:fixed;top:0;left:0;width:8px;height:8px;border-radius:50%;background:var(--accent);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:difference}
+#cursor-ring{position:fixed;top:0;left:0;width:40px;height:40px;border:1px solid rgba(244,241,234,.5);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .35s var(--ease),height .35s var(--ease),background .35s,border-color .35s;display:flex;align-items:center;justify-content:center}
+#cursor-ring.grow{width:80px;height:80px;background:rgba(232,137,90,.1);border-color:rgba(232,137,90,.6)}
+#cursor-ring.view{width:96px;height:96px;background:rgba(232,137,90,.92);border-color:transparent;mix-blend-mode:normal}
+#cursor-ring .clbl{opacity:0;font-family:var(--mono);font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:#0A0A0D;font-weight:600;transition:opacity .3s}
+#cursor-ring.view .clbl{opacity:1}
+#preloader{position:fixed;inset:0;background:#0A0A0D;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2rem}
+#preloader .pl-word{font-family:var(--serif);font-size:clamp(2rem,7vw,5rem);overflow:hidden;display:flex;gap:.3em}
+#preloader .pl-word span{display:inline-block;transform:translateY(110%)}
+.pl-bar{width:min(360px,60vw);height:1px;background:var(--line);position:relative;overflow:hidden}
+.pl-bar i{position:absolute;inset:0;background:linear-gradient(90deg,var(--accent),var(--cool));transform-origin:left;transform:scaleX(0)}
+.pl-pct{font-family:var(--mono);font-size:.85rem;letter-spacing:.2em;color:var(--ink-dim)}
+#grain{position:fixed;inset:-50%;width:200%;height:200%;pointer-events:none;z-index:9000;opacity:.045;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+#progress{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--cool));z-index:8000;width:0%}
+#rail{position:fixed;right:2vw;top:50%;transform:translateY(-50%);z-index:6000;display:flex;flex-direction:column;gap:1rem;mix-blend-mode:difference}
+#rail a{display:flex;align-items:center;gap:.7rem;font-family:var(--mono);font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--ink);opacity:.5;transition:opacity .4s}
+#rail a .dot{width:7px;height:7px;border-radius:50%;border:1px solid var(--ink);transition:all .4s var(--ease)}
+#rail a.on{opacity:1}#rail a.on .dot{background:var(--ink);transform:scale(1.4)}
+#rail a .rlbl{opacity:0;transform:translateX(8px);transition:all .4s var(--ease)}
+#rail a:hover .rlbl,#rail a.on .rlbl{opacity:1;transform:translateX(0)}
+@media(max-width:900px){#rail{display:none}}
+header.nav{position:fixed;top:0;left:0;width:100%;z-index:7000;padding:1.6rem 0;mix-blend-mode:difference}
+.nav-inner{display:flex;align-items:center;justify-content:space-between}
+.brand{font-family:var(--serif);font-size:1.3rem;font-weight:600}
+.nav-links{display:flex;gap:2.4rem;font-size:.82rem;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.nav-links a{position:relative}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:-5px;width:0;height:1px;background:var(--ink);transition:width .4s var(--ease)}
+.nav-links a:hover::after{width:100%}
+@media(max-width:760px){.nav-links{display:none}}
+</style><style id="s2">
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden}
+#webgl{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 70% 50%,transparent 30%,rgba(10,10,13,.5) 80%)}
+.hero-inner{position:relative;z-index:2;padding-top:8vh}
+.hero-eyebrow{margin-bottom:2rem}
+.hero-title{font-size:clamp(3.4rem,12vw,11rem);font-weight:600;letter-spacing:-.04em;line-height:.9}
+.hero-title .line{display:block;overflow:hidden}
+.hero-title .w{display:inline-block;transform:translateY(110%)}
+.hero-title .accent{font-style:italic;font-weight:400}
+.hero-sub{max-width:48ch;margin-top:2.4rem;font-size:clamp(1rem,1.5vw,1.28rem);color:var(--ink-dim);line-height:1.6}
+.hero-sub b{color:var(--ink);font-weight:500}
+.hero-cta{display:flex;gap:1rem;margin-top:2.8rem;flex-wrap:wrap}
+.scroll-cue{position:absolute;bottom:2.4rem;left:50%;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:.7rem;font-family:var(--mono);font-size:.68rem;letter-spacing:.25em;text-transform:uppercase;color:var(--ink-dim)}
+.scroll-cue i{width:1px;height:46px;background:linear-gradient(var(--accent),transparent);animation:cue 2s infinite}
+@keyframes cue{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+.hero-meta{position:absolute;right:4vw;bottom:2.6rem;z-index:2;display:flex;gap:2.4rem}
+.hero-meta div{text-align:right}
+.hero-meta b{font-family:var(--serif);font-size:1.9rem;display:block;line-height:1}
+.hero-meta small{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim)}
+@media(max-width:760px){.hero-meta{display:none}}
+.marquee{border-block:1px solid var(--line);padding:1.4rem 0;overflow:hidden;white-space:nowrap;background:var(--bg2)}
+.marquee-track{display:inline-block;will-change:transform}
+.marquee-track span{font-family:var(--serif);font-size:clamp(1.6rem,4vw,3rem);font-style:italic;padding:0 1.2rem;color:var(--ink)}
+.marquee-track span.o{color:var(--accent)}
+.block{padding:11rem 0;position:relative}
+.divider{width:100%;height:1px;position:relative;overflow:visible}
+.divider svg{width:100%;height:2px;display:block;overflow:visible}
+.divider path{stroke:var(--accent);stroke-width:1.4;fill:none}
+.grid-2{display:grid;grid-template-columns:.4fr 1fr;gap:4rem}
+@media(max-width:860px){.grid-2{grid-template-columns:1fr;gap:2rem}}
+.col-side{position:sticky;top:8rem;align-self:start}
+.col-main h2{font-size:clamp(2.2rem,5vw,4.4rem);line-height:1.04;margin-bottom:2rem}
+.col-main h2 em{font-style:italic;color:var(--accent);font-weight:400}
+.lede{font-size:clamp(1.05rem,1.6vw,1.42rem);color:var(--ink-dim);max-width:62ch;line-height:1.65}
+.who{margin-top:3.5rem;border-top:1px solid var(--line);padding-top:2.5rem}
+.who h3{font-size:1rem;font-family:var(--mono);font-weight:400;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:1.4rem}
+.who-list{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:.9rem 2rem}
+@media(max-width:680px){.who-list{grid-template-columns:1fr}}
+.who-list li{padding-left:1.4rem;position:relative;color:var(--ink-dim);font-size:.98rem}
+.who-list li::before{content:"→";position:absolute;left:0;color:var(--accent)}
+.who-list b{color:var(--ink);font-weight:600}
+.prereq{margin-top:2rem;font-family:var(--mono);font-size:.82rem;color:var(--ink-dim)}
+.block-head{margin-bottom:5rem;max-width:900px}
+.block-head h2{font-size:clamp(2.6rem,7vw,6rem);margin:1rem 0}
+.block-head h2 em{font-style:italic;color:var(--accent);font-weight:400}
+.block-head-p{color:var(--ink-dim);font-size:1.12rem;max-width:54ch;line-height:1.6}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6rem}
+@media(max-width:980px){.cards{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.cards{grid-template-columns:1fr}}
+.card{position:relative;padding:2.4rem;border:1px solid var(--line);border-radius:18px;background:linear-gradient(160deg,rgba(255,255,255,.03),rgba(255,255,255,0));transform-style:preserve-3d;will-change:transform;transition:border-color .5s,background .5s;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0;border-radius:18px;padding:1px;background:radial-gradient(180px circle at var(--mx,50%) var(--my,50%),rgba(232,137,90,.55),transparent 60%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .4s}
+.card:hover::before{opacity:1}
+.card:hover{background:linear-gradient(160deg,rgba(232,137,90,.07),rgba(255,255,255,0))}
+.card-n{font-family:var(--mono);font-size:.8rem;color:var(--accent);letter-spacing:.2em;transform:translateZ(40px);display:inline-block}
+.card h3{font-size:1.5rem;margin:1.2rem 0 .8rem;transform:translateZ(28px)}
+.card p{color:var(--ink-dim);font-size:.96rem;line-height:1.6;transform:translateZ(16px)}
+.journey{background:var(--bg2);overflow:hidden;padding:8rem 0}
+.journey-head{margin-bottom:3rem}
+.journey-pin{height:100vh;display:flex;align-items:center}
+.journey-track{display:flex;gap:2rem;padding:0 6vw;will-change:transform}
+.jcard{flex:0 0 clamp(280px,30vw,420px);height:60vh;border:1px solid var(--line);border-radius:22px;padding:2.6rem;background:linear-gradient(165deg,var(--bg3),var(--bg2));display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;transition:border-color .5s,transform .5s var(--ease)}
+.jcard:hover{border-color:var(--line2)}
+.jcard .jstage{font-family:var(--mono);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent)}
+.jcard h3{font-size:clamp(1.6rem,2.6vw,2.4rem);margin:1rem 0}
+.jcard p{color:var(--ink-dim);line-height:1.6;font-size:.98rem}
+.jcard .jbig{position:absolute;right:-1rem;bottom:-3rem;font-family:var(--serif);font-size:14rem;line-height:1;color:transparent;-webkit-text-stroke:1px rgba(232,137,90,.18);pointer-events:none}
+.jcard .jcount{font-family:var(--mono);font-size:.8rem;color:var(--ink-dim);margin-top:1rem;letter-spacing:.08em}
+.journey-prog{display:flex;align-items:center;gap:1rem;margin-top:2rem;font-family:var(--mono);font-size:.7rem;color:var(--ink-dim);letter-spacing:.1em}
+.journey-prog .jbar{flex:1;height:1px;background:var(--line);position:relative}
+.journey-prog .jbar i{position:absolute;left:0;top:0;height:100%;width:0;background:var(--accent)}
+.curriculum{background:var(--bg)}
+.mods{border-top:1px solid var(--line)}
+.mod{border-bottom:1px solid var(--line);transition:background .5s}
+.mod:hover{background:rgba(232,137,90,.04)}
+.mod-top{display:flex;align-items:center;gap:2rem;padding:2.2rem 1rem;transition:padding .5s var(--ease)}
+.mod:hover .mod-top{padding-left:2.2rem}
+.mod-i{font-family:var(--mono);font-size:.9rem;color:var(--accent);min-width:48px}
+.mod-top h3{font-size:clamp(1.4rem,3vw,2.4rem);flex:1;font-weight:500}
+.mod-c{font-family:var(--mono);font-size:.78rem;color:var(--ink-dim);letter-spacing:.1em}
+.mod-detail{max-height:0;overflow:hidden;transition:max-height .6s var(--ease)}
+.mod:hover .mod-detail{max-height:170px}
+.mod-detail p{padding:0 1rem 2rem 5rem;color:var(--ink-dim);max-width:80ch;line-height:1.7}
+@media(max-width:680px){.mod-detail p{padding-left:1rem}}
+.curr-foot{margin-top:3rem;font-size:1.2rem;color:var(--ink-dim)}
+.curr-foot b{color:var(--ink)}
+.why{background:var(--bg2)}
+.why-rows{display:flex;flex-direction:column}
+.why-row{display:grid;grid-template-columns:.5fr 1fr;gap:3rem;padding:4rem 0;border-top:1px solid var(--line);align-items:start}
+@media(max-width:760px){.why-row{grid-template-columns:1fr;gap:1rem}}
+.why-num{font-family:var(--serif);font-size:clamp(4rem,10vw,9rem);color:transparent;-webkit-text-stroke:1px var(--accent);line-height:.8;display:block;will-change:transform}
+.why-v h3{font-size:clamp(1.6rem,3.5vw,2.6rem);margin-bottom:1rem}
+.why-v p{color:var(--ink-dim);font-size:1.1rem;line-height:1.65;max-width:52ch}
+.deep-row{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;margin-bottom:8rem}
+.deep-row.reverse .deep-visual{order:2}.deep-row.reverse .deep-text{order:1}
+@media(max-width:860px){.deep-row{grid-template-columns:1fr;gap:2rem}}
+.deep-visual{aspect-ratio:4/3;border-radius:20px;overflow:hidden;border:1px solid var(--line);position:relative}
+.dv-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:clamp(1rem,2.4vw,1.6rem);letter-spacing:.08em;flex-direction:column;gap:1rem;text-align:center;padding:1rem}
+.dv-1{background:radial-gradient(circle at 30% 30%,rgba(232,137,90,.35),transparent 60%),linear-gradient(135deg,#16110f,#0a0a0d)}
+.dv-2{background:radial-gradient(circle at 70% 40%,rgba(110,140,168,.35),transparent 60%),linear-gradient(135deg,#0d1216,#0a0a0d)}
+.dv-3{background:radial-gradient(circle at 50% 60%,rgba(217,119,87,.4),transparent 60%),linear-gradient(135deg,#15100e,#0a0a0d)}
+.dv-inner code{color:var(--ink);opacity:.9;background:rgba(10,10,13,.45);padding:.5em 1em;border-radius:10px;border:1px solid var(--line);font-size:.85em}
+.dv-inner .dot3{display:flex;gap:.5rem}.dv-inner .dot3 b{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:blink 1.4s infinite}
+.dv-inner .dot3 b:nth-child(2){animation-delay:.2s}.dv-inner .dot3 b:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+.deep-tag{font-family:var(--mono);font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent)}
+.deep-text h3{font-size:clamp(2rem,4.5vw,3.4rem);margin:1rem 0}
+.deep-text p{color:var(--ink-dim);font-size:1.1rem;line-height:1.7;max-width:50ch}
+.deep-text .chips{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.6rem}
+.deep-text .chips span{font-family:var(--mono);font-size:.72rem;padding:.45em .9em;border:1px solid var(--line2);border-radius:40px;color:var(--ink-dim);letter-spacing:.05em}
+.stats{background:var(--bg2)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;text-align:center}
+@media(max-width:760px){.stats-grid{grid-template-columns:1fr 1fr;gap:3rem}}
+.stat b{font-family:var(--serif);font-size:clamp(3.4rem,8vw,7rem);display:block;line-height:1;color:var(--accent)}
+.stat small{font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim);margin-top:1rem;display:block}
+.cta{position:relative;min-height:95vh;display:flex;align-items:center;overflow:hidden;text-align:center}
+#webgl2{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.cta::after{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse at 50% 50%,transparent 25%,rgba(10,10,13,.6) 75%)}
+.cta-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:1.8rem}
+.cta-title{font-size:clamp(2.8rem,9vw,8rem);line-height:.98;font-weight:600;letter-spacing:-.03em}
+.cta-title .accent{font-style:italic;font-weight:400}
+.cta-p{max-width:48ch;color:var(--ink-dim);font-size:1.15rem;line-height:1.6}
+.foot{padding:5rem 0 4rem;border-top:1px solid var(--line)}
+.foot-inner{display:flex;flex-direction:column;gap:1.4rem;align-items:center;text-align:center}
+.foot .brand{font-size:1.8rem}
+.foot-note{color:var(--ink-dim);max-width:52ch;font-size:.95rem;line-height:1.6}
+.foot-c{font-family:var(--mono);font-size:.78rem;color:var(--ink-dim);letter-spacing:.1em}
+.reveal-up{opacity:0;transform:translateY(30px)}
+#preloader .pl-word span{animation:plword .9s var(--ease) forwards}
+#preloader .pl-word span:nth-child(2){animation-delay:.08s}
+#preloader .pl-word span:nth-child(3){animation-delay:.16s}
+@keyframes plword{to{transform:translateY(0)}}
+.no-gsap .hero-title .w{transform:none!important}
+@media(prefers-reduced-motion:reduce){
+*{animation:none!important;transition:none!important}
+.reveal-up{opacity:1!important;transform:none!important}
+.hero-title .w{transform:none!important}
+#preloader .pl-word span{transform:none!important}
+body{cursor:auto}#cursor,#cursor-ring,#rail{display:none}
+}
+</style></head><body>
+<div id="grain"></div>
+<div id="progress"></div>
+<div id="cursor"></div>
+<div id="cursor-ring"><span class="clbl">drag</span></div>
+<div id="preloader">
+<div class="pl-word"><span>Claude</span><span>×</span><span>Bedrock</span></div>
+<div class="pl-bar"><i></i></div>
+<div class="pl-pct">00%</div>
+</div>
+<nav id="rail">
+<a href="#overview" data-cursor><span class="dot"></span><span class="rlbl">Overview</span></a>
+<a href="#learn" data-cursor><span class="dot"></span><span class="rlbl">Learn</span></a>
+<a href="#journey" data-cursor><span class="dot"></span><span class="rlbl">Journey</span></a>
+<a href="#curriculum" data-cursor><span class="dot"></span><span class="rlbl">Curriculum</span></a>
+<a href="#why" data-cursor><span class="dot"></span><span class="rlbl">Why</span></a>
+<a href="#deep" data-cursor><span class="dot"></span><span class="rlbl">Concepts</span></a>
+<a href="#enroll" data-cursor><span class="dot"></span><span class="rlbl">Enroll</span></a>
+</nav>
+<header class="nav"><div class="wrap nav-inner">
+<div class="brand" data-cursor>Claude <span style="color:var(--accent)">×</span> Bedrock</div>
+<nav class="nav-links">
+<a href="#overview" data-cursor>Overview</a>
+<a href="#journey" data-cursor>Journey</a>
+<a href="#curriculum" data-cursor>Curriculum</a>
+<a href="#deep" data-cursor>Concepts</a>
+<a href="#enroll" data-cursor>Enroll</a>
+</nav>
+</div></header>
+<section id="hero" class="hero">
+<canvas id="webgl"></canvas>
+<div class="wrap hero-inner">
+<div class="hero-eyebrow eyebrow reveal-up">Anthropic Academy · 83-Lesson Technical Course</div>
+<h1 class="hero-title">
+<span class="line"><span class="w">Build with</span></span>
+<span class="line"><span class="w">Claude on</span></span>
+<span class="line"><span class="w accent gradtext">Amazon Bedrock</span></span>
+</h1>
+<p class="hero-sub reveal-up">From your <b>first API request</b> to <b>autonomous agents</b> — a hands-on path through tool use, RAG, MCP and Claude Code, deployed natively on AWS.</p>
+<div class="hero-cta reveal-up">
+<a class="btn-magnetic" href="#journey" data-magnetic data-cursor><span class="lbl">Start Learning</span><span class="lbl">→</span></a>
+<a class="btn-magnetic btn-ghost" href="#overview" data-magnetic data-cursor><span class="lbl">Course Overview</span></a>
+</div>
+</div>
+<div class="scroll-cue"><span>Scroll to explore</span><i></i></div>
+<div class="hero-meta">
+<div><b data-count="83">0</b><small>Lessons</small></div>
+<div><b data-count="9">0</b><small>Modules</small></div>
+<div><b data-count="6">0</b><small>Quizzes</small></div>
+</div>
+</section>
+<div class="marquee" aria-hidden="true"><div class="marquee-track">
+<span>API Integration —</span><span class="o">Tool Use —</span><span>RAG Pipelines —</span><span class="o">Prompt Engineering —</span><span>Model Context Protocol —</span><span class="o">Agents —</span><span>Extended Thinking —</span><span class="o">Prompt Caching —</span><span>Computer Use —</span><span class="o">Streaming —</span><span>API Integration —</span><span class="o">Tool Use —</span><span>RAG Pipelines —</span><span class="o">Prompt Engineering —</span><span>Model Context Protocol —</span><span class="o">Agents —</span><span>Extended Thinking —</span><span class="o">Prompt Caching —</span><span>Computer Use —</span><span class="o">Streaming —</span>
+</div></div>
+<section id="overview" class="block">
+<div class="wrap grid-2">
+<div class="col-side">
+<span class="secnum">[ 01 ]</span>
+<span class="eyebrow" style="margin-top:1rem;display:inline-flex">The Course</span>
+</div>
+<div class="col-main">
+<h2 class="big-reveal">One course that takes you from <em>first request</em> to <em>production agents.</em></h2>
+<p class="lede reveal-up">This is a comprehensive, code-first guide to integrating and deploying Claude through Amazon Bedrock. You'll implement Claude's API, build production-ready applications, and master the advanced surface — tool use, retrieval augmented generation, the Model Context Protocol, and autonomous agents — entirely within the AWS ecosystem. No theory for its own sake: every module pairs concepts with hands-on exercises and a quiz.</p>
+<div class="who reveal-up">
+<h3>Who it's for</h3>
+<ul class="who-list">
+<li><b>Backend developers</b> building AI-powered applications</li>
+<li><b>ML engineers</b> shipping production RAG &amp; conversational pipelines</li>
+<li><b>DevOps engineers</b> deploying &amp; optimizing Claude on AWS</li>
+<li><b>Full-stack developers</b> creating tool use &amp; agent capabilities</li>
+<li><b>Technical architects</b> designing scalable retrieval &amp; caching systems</li>
+<li><b>Automation engineers</b> building autonomous code &amp; task agents</li>
+</ul>
+<p class="prereq">Prerequisites — Python proficiency · a basic understanding of AWS &amp; Amazon Bedrock.</p>
+</div>
+</div>
+</div>
+</section>
+<div class="wrap"><div class="divider"><svg viewBox="0 0 1000 2" preserveAspectRatio="none"><path d="M0 1 H1000"/></svg></div></div>
+<section id="learn" class="block">
+<div class="wrap">
+<div class="block-head">
+<span class="secnum">[ 02 ]</span>
+<h2 class="big-reveal">Nine things<br>you'll <em>actually build</em></h2>
+<p class="block-head-p reveal-up">Concrete, production-oriented capabilities — not slideware. Hover a card; it tracks your cursor.</p>
+</div>
+<div class="cards">
+<article class="card tilt" data-cursor><span class="card-n">01</span><h3>Multi-turn conversations</h3><p>Run Anthropic models on Bedrock with stateful multi-turn dialogue and precise system-prompt control.</p></article>
+<article class="card tilt" data-cursor><span class="card-n">02</span><h3>Prompt evaluation</h3><p>Build structured prompts and measure them with rigorous, repeatable evaluation workflows.</p></article>
+<article class="card tilt" data-cursor><span class="card-n">03</span><h3>Tools &amp; function calling</h3><p>Design tools with JSON Schema, handle tool-use responses, and run them with batch processing.</p></article>
+<article class="card tilt" data-cursor><span class="card-n">04</span><h3>RAG pipelines</h3><p>Chunk, embed, search with BM25 + semantics, rerank, and apply contextual retrieval at scale.</p></article>
+<article class="card tilt" data-cursor><span class="card-n">05</span><h3>Advanced Claude features</h3><p>Extended thinking, image &amp; PDF support, citations, and prompt caching for real workloads.</p></article>
+<article class="card tilt" data-cursor><span class="card-n">06</span><h3>Claude Code automation</h3><p>Automated debugging, parallel execution, and hands-off task completion with Claude Code.</p></article>
+<article class="card tilt" data-cursor><span class="card-n">07</span><h3>Model Context Protocol</h3><p>Define tools, resources and prompts via MCP and wire them into real client applications.</p></article>
+<article class="card tilt" data-cursor><span class="card-n">08</span><h3>Inference optimization</h3><p>Streaming, temperature control, and structured data extraction tuned for speed and reliability.</p></article>
+<article class="card tilt" data-cursor><span class="card-n">09</span><h3>Evaluation frameworks</h3><p>Model-based and code-based grading suites so you can ship changes with confidence.</p></article>
+</div>
+</div>
+</section>
+<section id="journey" class="journey">
+<div class="wrap journey-head">
+<span class="secnum">[ 03 ]</span>
+<h2 class="big-reveal" style="font-size:clamp(2.6rem,7vw,6rem);margin:1rem 0">The learning <em style="font-style:italic;color:var(--accent);font-weight:400">journey</em></h2>
+<p class="block-head-p reveal-up">Six stages, each building on the last — scroll to travel the path sideways.</p>
+</div>
+<div class="journey-pin">
+<div class="journey-track">
+<div class="jcard" data-cursor><div><span class="jstage">Stage 01 · Foundations</span><h3>Speak to Claude</h3><p>Access the API on Bedrock, make your first request, hold multi-turn conversations, shape behaviour with system prompts, and control output with temperature and streaming.</p></div><span class="jcount">Modules 01–02 · 16 lessons</span><span class="jbig">01</span></div>
+<div class="jcard" data-cursor><div><span class="jstage">Stage 02 · Quality</span><h3>Measure &amp; prompt</h3><p>Stand up an eval workflow, generate test datasets, grade with models and code, then sharpen prompts — clear, specific, XML-structured, example-driven.</p></div><span class="jcount">Modules 03–04 · 16 lessons</span><span class="jbig">02</span></div>
+<div class="jcard" data-cursor><div><span class="jstage">Stage 03 · Capability</span><h3>Give Claude tools</h3><p>Define tool functions with JSON Schema, run them, return results across turns, add multiple and batched tools, and extract structured data flexibly.</p></div><span class="jcount">Module 05 · 13 lessons</span><span class="jbig">03</span></div>
+<div class="jcard" data-cursor><div><span class="jstage">Stage 04 · Knowledge</span><h3>Ground in your data</h3><p>Build the full RAG flow — chunking, embeddings, BM25 lexical search, a multi-search pipeline, reranking, and contextual retrieval for accuracy at scale.</p></div><span class="jcount">Module 06 · 10 lessons</span><span class="jbig">04</span></div>
+<div class="jcard" data-cursor><div><span class="jstage">Stage 05 · Depth</span><h3>Unlock the features</h3><p>Extended thinking, image and PDF support, citations, and prompt caching — with the rules and patterns that make them pay off in production.</p></div><span class="jcount">Module 07 · 8 lessons</span><span class="jbig">05</span></div>
+<div class="jcard" data-cursor><div><span class="jstage">Stage 06 · Autonomy</span><h3>Build agents</h3><p>Implement MCP for tools, resources and prompts, then orchestrate autonomous agents with Claude Code and Computer Use — parallelized, self-debugging, end-to-end.</p></div><span class="jcount">Modules 08–09 · 21 lessons</span><span class="jbig">06</span></div>
+</div>
+</div>
+<div class="wrap"><div class="journey-prog"><span>Begin</span><span class="jbar"><i></i></span><span>Ship</span></div></div>
+</section>
+<section id="curriculum" class="block curriculum">
+<div class="wrap">
+<div class="block-head">
+<span class="secnum">[ 04 ]</span>
+<h2 class="big-reveal">The full<br><em>curriculum</em></h2>
+<p class="block-head-p reveal-up">Nine modules · 83 lessons · exercises and quizzes throughout. Hover any module to expand it.</p>
+</div>
+<div class="mods">
+<div class="mod" data-cursor><div class="mod-top"><span class="mod-i">M01</span><h3>Course introduction</h3><span class="mod-c">2 lessons</span></div><div class="mod-detail"><p>Introduction to the course · Overview of Claude Models</p></div></div>
+<div class="mod" data-cursor><div class="mod-top"><span class="mod-i">M02</span><h3>Working with the API</h3><span class="mod-c">14 lessons</span></div><div class="mod-detail"><p>Accessing the API · Making a request · Multi-turn conversations · Chat bot exercise · System prompts &amp; exercise · Temperature · Streaming · Controlling model output · Structured data · Quiz.</p></div></div>
+<div class="mod" data-cursor><div class="mod-top"><span class="mod-i">M03</span><h3>Prompt evaluations</h3><span class="mod-c">9 lessons</span></div><div class="mod-detail"><p>A typical eval workflow · Generating test datasets · Running the eval · Model-based grading · Code-based grading · Exercise · Quiz.</p></div></div>
+<div class="mod" data-cursor><div class="mod-top"><span class="mod-i">M04</span><h3>Prompt engineering</h3><span class="mod-c">7 lessons</span></div><div class="mod-detail"><p>Being clear and direct · Being specific · Structure with XML tags · Providing examples · Exercise · Quiz.</p></div></div>
+<div class="mod" data-cursor><div class="mod-top"><span class="mod-i">M05</span><h3>Tool use</h3><span class="mod-c">13 lessons</span></div><div class="mod-detail"><p>Tool functions · JSON Schema for tools · Handling responses · Running tool functions · Sending results · Multi-turn with tools · Multiple &amp; batch tools · Structured &amp; flexible extraction · Text editor tool · Quiz.</p></div></div>
+<div class="mod" data-cursor><div class="mod-top"><span class="mod-i">M06</span><h3>Retrieval Augmented Generation</h3><span class="mod-c">10 lessons</span></div><div class="mod-detail"><p>Chunking strategies · Text embeddings · The full RAG flow · BM25 lexical search · Multi-search pipeline · Reranking · Contextual retrieval · Quiz.</p></div></div>
+<div class="mod" data-cursor><div class="mod-top"><span class="mod-i">M07</span><h3>Features of Claude</h3><span class="mod-c">8 lessons</span></div><div class="mod-detail"><p>Extended thinking · Image support · PDF support · Citations · Prompt caching &amp; its rules · Caching in action · Quiz.</p></div></div>
+<div class="mod" data-cursor><div class="mod-top"><span class="mod-i">M08</span><h3>Model Context Protocol</h3><span class="mod-c">12 lessons</span></div><div class="mod-detail"><p>MCP clients · Project setup · Defining tools · The server inspector · Implementing a client · Resources &amp; access · Defining prompts · Review · Quiz.</p></div></div>
+<div class="mod" data-cursor><div class="mod-top"><span class="mod-i">M09</span><h3>Agents</h3><span class="mod-c">9 lessons</span></div><div class="mod-detail"><p>Agents overview · Claude Code setup &amp; in action · Enhancements with MCP servers · Parallelizing Claude Code · Automated debugging · Computer Use &amp; how it works · Qualities of agents.</p></div></div>
+</div>
+<p class="curr-foot reveal-up">Capped with a <b>final assessment</b> and a <b>course wrap-up</b>.</p>
+</div>
+</section>
+<section id="why" class="block why">
+<div class="wrap">
+<div class="block-head">
+<span class="secnum">[ 05 ]</span>
+<h2 class="big-reveal">Why Claude<br>+ <em>Amazon Bedrock</em></h2>
+</div>
+<div class="why-rows">
+<div class="why-row"><div class="why-k"><span class="why-num" data-depth="1">01</span></div><div class="why-v reveal-up"><h3>Enterprise-grade, on your AWS</h3><p>Access Claude through Amazon Bedrock and run it natively inside the infrastructure you already trust — managed, secure, and ready to scale without leaving the AWS ecosystem.</p></div></div>
+<div class="why-row"><div class="why-k"><span class="why-num" data-depth="1.4">02</span></div><div class="why-v reveal-up"><h3>From prototype to production</h3><p>Practical implementation patterns and performance techniques — streaming, caching, structured extraction — take you from a first request to a real, deployable system.</p></div></div>
+<div class="why-row"><div class="why-k"><span class="why-num" data-depth="1.8">03</span></div><div class="why-v reveal-up"><h3>The complete capability surface</h3><p>Tool use, RAG, MCP, extended thinking, vision, caching, Computer Use and agents — one course covers the entire toolkit for building serious AI products.</p></div></div>
+</div>
+</div>
+</section>
+<section id="deep" class="block deep">
+<div class="wrap">
+<div class="block-head"><span class="secnum">[ 06 ]</span><h2 class="big-reveal">Key concepts,<br><em>deep-dived</em></h2></div>
+<div class="deep-row">
+<div class="deep-visual"><div class="dv-inner dv-1"><code>"type": "tool_use"</code><span style="font-size:.8em;color:var(--ink-dim)">claude → your function → claude</span></div></div>
+<div class="deep-text reveal-up"><span class="deep-tag">Tool Use · Function Calling</span><h3>Give Claude hands.</h3><p>Describe functions with JSON Schema and Claude decides when to call them. You handle the tool-use response, run the function, send the result back, and continue the conversation — across multiple tools, batched calls, and flexible structured extraction, right up to the built-in text editor tool.</p><div class="chips"><span>JSON Schema</span><span>multi-turn</span><span>batch tools</span><span>text editor</span></div></div>
+</div>
+<div class="deep-row reverse">
+<div class="deep-visual"><div class="dv-inner dv-2"><code>chunk → embed → search → rerank</code><span style="font-size:.8em;color:var(--ink-dim)">semantic + BM25, contextual</span></div></div>
+<div class="deep-text reveal-up"><span class="deep-tag">Retrieval Augmented Generation</span><h3>Ground answers in your data.</h3><p>Build the complete flow: choose a chunking strategy, generate embeddings, then combine semantic and BM25 lexical search into a multi-search pipeline. Rerank the candidates and layer in contextual retrieval so Claude cites the right source — accurately, at scale.</p><div class="chips"><span>embeddings</span><span>BM25</span><span>reranking</span><span>contextual retrieval</span></div></div>
+</div>
+<div class="deep-row">
+<div class="deep-visual"><div class="dv-inner dv-3"><div class="dot3"><b></b><b></b><b></b></div><code>agent.run()</code><span style="font-size:.8em;color:var(--ink-dim)">MCP · Claude Code · Computer Use</span></div></div>
+<div class="deep-text reveal-up"><span class="deep-tag">Agents · MCP · Claude Code</span><h3>Build systems that act.</h3><p>Expose tools, resources and prompts through the Model Context Protocol, then orchestrate autonomous agents with Claude Code and Computer Use. Parallelize work, debug automatically, and let Claude execute real multi-step tasks end-to-end — with the qualities that make an agent dependable.</p><div class="chips"><span>MCP server</span><span>Claude Code</span><span>parallelization</span><span>Computer Use</span></div></div>
+</div>
+<div class="deep-row reverse">
+<div class="deep-visual"><div class="dv-inner dv-2" style="background:radial-gradient(circle at 40% 50%,rgba(143,168,192,.3),transparent 60%),linear-gradient(135deg,#11130f,#0a0a0d)"><code>cache_control + stream</code><span style="font-size:.8em;color:var(--ink-dim)">extended thinking · citations</span></div></div>
+<div class="deep-text reveal-up"><span class="deep-tag">Performance &amp; Features</span><h3>Make it fast and rich.</h3><p>Stream tokens as they generate, cut cost and latency with prompt caching (and its rules), and unlock extended thinking, image and PDF understanding, and inline citations — the features that turn a working demo into a polished product.</p><div class="chips"><span>streaming</span><span>prompt caching</span><span>extended thinking</span><span>vision &amp; PDF</span><span>citations</span></div></div>
+</div>
+</div>
+</section>
+<section class="block stats">
+<div class="wrap stats-grid">
+<div class="stat reveal-up"><b data-count="83">0</b><small>Lessons, end to end</small></div>
+<div class="stat reveal-up"><b data-count="9">0</b><small>Comprehensive modules</small></div>
+<div class="stat reveal-up"><b data-count="6">0</b><small>Knowledge-check quizzes</small></div>
+<div class="stat reveal-up"><b data-count="100" data-suffix="%">0</b><small>Hands-on, no fluff</small></div>
+</div>
+</section>
+<section id="enroll" class="cta">
+<canvas id="webgl2"></canvas>
+<div class="wrap cta-inner">
+<span class="eyebrow reveal-up" style="display:inline-flex">Earn your certificate</span>
+<h2 class="cta-title">Start building on<br><span class="accent gradtext">Claude × Bedrock.</span></h2>
+<p class="reveal-up cta-p">Implement the API, master tool use and RAG, ship autonomous agents on AWS. The whole path — one course, 83 lessons.</p>
+<a class="btn-magnetic" href="https://anthropic.skilljar.com/claude-in-amazon-bedrock" target="_blank" rel="noopener" data-magnetic data-cursor><span class="lbl">Enroll &amp; Start the Course</span><span class="lbl">→</span></a>
+</div>
+</section>
+<footer class="foot"><div class="wrap foot-inner">
+<div class="brand">Claude <span style="color:var(--accent)">×</span> Bedrock</div>
+<p class="foot-note">An Anthropic Academy technical course · hosted on Skilljar. This is a concept landing page built from the real course curriculum.</p>
+<div class="foot-c">© 2025 Anthropic PBC</div>
+</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script src="https://unpkg.com/split-type@0.3.4/umd/index.min.js"></script>
+<script>
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(typeof gsap==='undefined'){document.documentElement.classList.add('no-gsap');}
+function reveal(){
+if(window.__revealed)return;window.__revealed=true;
+const pl=document.getElementById('preloader');
+if(pl){if(window.gsap)gsap.to(pl,{yPercent:-100,duration:1.1,ease:'power4.inOut',onComplete:function(){pl.style.display='none';}});else pl.style.display='none';}
+if(typeof heroIntro==='function')heroIntro();
+if(typeof startLenis==='function')startLenis();
+if(window.ScrollTrigger)setTimeout(function(){ScrollTrigger.refresh();},80);
+}
+(function(){
+const bar=document.querySelector('.pl-bar i'),pct=document.querySelector('.pl-pct');
+const words=document.querySelectorAll('#preloader .pl-word span');
+if(window.gsap)gsap.to(words,{y:0,duration:1,stagger:.08,ease:'power4.out',delay:.1});
+let p=0;
+const iv=setInterval(function(){
+p+=Math.max(1,Math.round((100-p)*0.1));
+if(p>=100){p=100;clearInterval(iv);}
+if(pct)pct.textContent=(p<10?'0':'')+p+'%';
+if(bar)bar.style.width=p+'%';
+if(p>=100){clearInterval(iv);setTimeout(reveal,350);}
+},60);
+setTimeout(function(){clearInterval(iv);if(pct)pct.textContent='100%';if(bar)bar.style.width='100%';reveal();},6000);
+})();
+let lenis;
+function startLenis(){
+if(RM||!window.Lenis){initScroll();return;}
+lenis=new Lenis({duration:1.15,easing:t=>Math.min(1,1.001-Math.pow(2,-10*t)),smoothWheel:true});
+function raf(t){lenis.raf(t);requestAnimationFrame(raf);}requestAnimationFrame(raf);
+if(window.ScrollTrigger){lenis.on('scroll',ScrollTrigger.update);gsap.ticker.lagSmoothing(0);}
+initScroll();
+}
+function heroIntro(){
+document.querySelectorAll('.hero-sub,.hero-cta').forEach(e=>e.style.transform='translateY(20px)');
+if(RM||!window.gsap){document.querySelectorAll('.hero-title .w').forEach(w=>w.style.transform='none');return;}
+const tl=gsap.timeline({defaults:{ease:'power4.out'}});
+tl.to('.hero-title .w',{y:0,duration:1.2,stagger:.12})
+.from('.hero-eyebrow',{opacity:0,y:20,filter:'blur(8px)',duration:.8},'-=.9')
+.to('.hero-sub',{opacity:1,y:0,duration:.9},'-=.7')
+.to('.hero-cta',{opacity:1,y:0,duration:.8},'-=.6');
+}
+function initScroll(){
+if(!window.gsap)return;
+if(window.ScrollTrigger)gsap.registerPlugin(ScrollTrigger);
+if(window.ScrollTrigger)gsap.to('#progress',{width:'100%',ease:'none',scrollTrigger:{trigger:document.body,start:'top top',end:'bottom bottom',scrub:.3}});
+const rail=document.querySelectorAll('#rail a');
+document.querySelectorAll('section[id]').forEach(sec=>{
+if(window.ScrollTrigger)ScrollTrigger.create({trigger:sec,start:'top 50%',end:'bottom 50%',onToggle:self=>{if(self.isActive)rail.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+sec.id));}});
+});
+if(RM){document.querySelectorAll('[data-count]').forEach(el=>el.textContent=el.dataset.count+(el.dataset.suffix||''));return;}
+gsap.utils.toArray('.reveal-up').forEach(el=>gsap.to(el,{opacity:1,y:0,duration:1,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%'}}));
+if(window.SplitType){gsap.utils.toArray('.big-reveal').forEach(h=>{const s=new SplitType(h,{types:'lines,words'});s.lines.forEach(l=>l.style.overflow='hidden');gsap.set(s.words,{yPercent:115});gsap.to(s.words,{yPercent:0,duration:1,ease:'power4.out',stagger:.05,scrollTrigger:{trigger:h,start:'top 85%'}});});}
+gsap.utils.toArray('.cards').forEach(c=>gsap.from(c.children,{opacity:0,y:60,duration:.9,stagger:.08,ease:'power3.out',scrollTrigger:{trigger:c,start:'top 80%'}}));
+gsap.utils.toArray('.mod').forEach(m=>gsap.from(m,{opacity:0,x:-40,duration:.8,ease:'power3.out',scrollTrigger:{trigger:m,start:'top 92%'}}));
+gsap.utils.toArray('.deep-visual').forEach(v=>gsap.fromTo(v,{clipPath:'inset(0 0 100% 0)'},{clipPath:'inset(0 0 0% 0)',duration:1.2,ease:'power4.out',scrollTrigger:{trigger:v,start:'top 82%'}}));
+if(window.ScrollTrigger)gsap.to('.marquee-track',{xPercent:-50,ease:'none',scrollTrigger:{trigger:'.marquee',start:'top bottom',end:'bottom top',scrub:1}});
+gsap.utils.toArray('.why-num').forEach(n=>{const d=parseFloat(n.dataset.depth||'1');gsap.to(n,{yPercent:-30*d,ease:'none',scrollTrigger:{trigger:n.closest('.why-row'),start:'top bottom',end:'bottom top',scrub:1}});});
+gsap.utils.toArray('.divider path').forEach(p=>{const len=p.getTotalLength();gsap.set(p,{strokeDasharray:len,strokeDashoffset:len});gsap.to(p,{strokeDashoffset:0,duration:1.4,ease:'power2.out',scrollTrigger:{trigger:p,start:'top 90%'}});});
+gsap.utils.toArray('[data-count]').forEach(el=>{const end=+el.dataset.count,suf=el.dataset.suffix||'',o={v:0};gsap.to(o,{v:end,duration:2,ease:'power2.out',scrollTrigger:{trigger:el,start:'top 92%'},onUpdate:()=>el.textContent=Math.floor(o.v)+suf});});
+const track=document.querySelector('.journey-track');
+if(track&&window.ScrollTrigger&&innerWidth>760){
+const dist=()=>track.scrollWidth-innerWidth+(innerWidth*0.12);
+gsap.to(track,{x:()=>-dist(),ease:'none',scrollTrigger:{trigger:'#journey',start:'top top',end:()=>'+='+dist(),scrub:.6,pin:'.journey-pin',anticipatePin:1,invalidateOnRefresh:true,onUpdate:self=>{const i=document.querySelector('.journey-prog .jbar i');if(i)i.style.width=(self.progress*100)+'%';}}});
+}
+}
+(function(){
+if(RM)return;
+const dot=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=innerWidth/2,my=innerHeight/2,rx=mx,ry=my;
+addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';});
+(function loop(){rx+=(mx-rx)*.18;ry+=(my-ry)*.18;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+document.addEventListener('mouseover',e=>{if(e.target.closest('.journey-track')){ring.classList.add('view');ring.classList.remove('grow');}else if(e.target.closest('[data-cursor],a,button,.card,.mod')){ring.classList.add('grow');ring.classList.remove('view');}});
+document.addEventListener('mouseout',e=>{if(e.target.closest('[data-cursor],a,button,.card,.mod,.journey-track')){ring.classList.remove('grow');ring.classList.remove('view');}});
+})();
+(function(){
+if(RM||!window.gsap)return;
+document.querySelectorAll('[data-magnetic]').forEach(b=>{b.addEventListener('mousemove',e=>{const r=b.getBoundingClientRect();gsap.to(b,{x:(e.clientX-r.left-r.width/2)*.4,y:(e.clientY-r.top-r.height/2)*.5,duration:.6,ease:'power3.out'});});b.addEventListener('mouseleave',()=>gsap.to(b,{x:0,y:0,duration:.7,ease:'elastic.out(1,.4)'}));});
+})();
+(function(){
+if(RM||!window.gsap)return;
+document.querySelectorAll('.tilt').forEach(card=>{card.addEventListener('mousemove',e=>{const r=card.getBoundingClientRect();const px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;card.style.setProperty('--mx',(e.clientX-r.left)+'px');card.style.setProperty('--my',(e.clientY-r.top)+'px');gsap.to(card,{rotateY:px*14,rotateX:-py*14,duration:.5,ease:'power2.out',transformPerspective:900});});card.addEventListener('mouseleave',()=>gsap.to(card,{rotateX:0,rotateY:0,duration:.8,ease:'elastic.out(1,.5)'}));});
+})();
+(function(){
+if(RM)return;const el=document.querySelector('.hero-title .accent');if(!el)return;
+const target=el.textContent;const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ#%&{}<>/*';
+function scramble(){let f=0;const dur=36;const id=setInterval(()=>{el.textContent=target.split('').map((c,i)=>{if(c===' ')return ' ';if(f/dur*target.length>i)return target[i];return chars[Math.floor(Math.random()*chars.length)];}).join('');f++;if(f>dur){clearInterval(id);el.textContent=target;}},45);}
+setTimeout(scramble,2700);
+})();
+</script>
+<script>
+(function(){
+if(typeof THREE==='undefined')return;
+const RM_GL=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let mouseX=0,mouseY=0;
+addEventListener('mousemove',e=>{mouseX=(e.clientX/innerWidth)*2-1;mouseY=(e.clientY/innerHeight)*2-1;});
+const SNOISE='vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}vec4 permute(vec4 x){return mod289(((x*34.0)+1.0)*x);}vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}float snoise(vec3 v){const vec2 C=vec2(1.0/6.0,1.0/3.0);const vec4 D=vec4(0.0,0.5,1.0,2.0);vec3 i=floor(v+dot(v,C.yyy));vec3 x0=v-i+dot(i,C.xxx);vec3 g=step(x0.yzx,x0.xyz);vec3 l=1.0-g;vec3 i1=min(g.xyz,l.zxy);vec3 i2=max(g.xyz,l.zxy);vec3 x1=x0-i1+C.xxx;vec3 x2=x0-i2+C.yyy;vec3 x3=x0-D.yyy;i=mod289(i);vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));float n_=0.142857142857;vec3 ns=n_*D.wyz-D.xzx;vec4 j=p-49.0*floor(p*ns.z*ns.z);vec4 x_=floor(j*ns.z);vec4 y_=floor(j-7.0*x_);vec4 x=x_*ns.x+ns.yyyy;vec4 y=y_*ns.x+ns.yyyy;vec4 h=1.0-abs(x)-abs(y);vec4 b0=vec4(x.xy,y.xy);vec4 b1=vec4(x.zw,y.zw);vec4 s0=floor(b0)*2.0+1.0;vec4 s1=floor(b1)*2.0+1.0;vec4 sh=-step(h,vec4(0.0));vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy;vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;vec3 p0=vec3(a0.xy,h.x);vec3 p1=vec3(a0.zw,h.y);vec3 p2=vec3(a1.xy,h.z);vec3 p3=vec3(a1.zw,h.w);vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));p0*=norm.x;p1*=norm.y;p2*=norm.z;p3*=norm.w;vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0);m=m*m;return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));}';
+// HERO scene with scroll dolly
+(function(){
+const canvas=document.getElementById('webgl');if(!canvas)return;
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.8));renderer.setSize(innerWidth,innerHeight);
+const scene=new THREE.Scene();const cam=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,100);cam.position.z=5;
+const uniforms={uTime:{value:0},uMouse:{value:new THREE.Vector2(0,0)}};
+const mat=new THREE.ShaderMaterial({uniforms,wireframe:true,transparent:true,
+vertexShader:'uniform float uTime;uniform vec2 uMouse;varying float vN;'+SNOISE+'void main(){vec3 p=position;float n=snoise(p*1.1+uTime*0.25+vec3(uMouse*1.5,0.0));vN=n;p+=normal*n*0.45;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);}',
+fragmentShader:'varying float vN;void main(){vec3 coral=vec3(0.91,0.54,0.35);vec3 cool=vec3(0.43,0.55,0.66);vec3 col=mix(cool,coral,smoothstep(-0.4,0.6,vN));float a=0.35+0.55*smoothstep(-0.2,0.7,vN);gl_FragColor=vec4(col,a);}'});
+const sphere=new THREE.Mesh(new THREE.IcosahedronGeometry(1.6,24),mat);sphere.position.x=1.2;scene.add(sphere);
+const N=950;const pos=new Float32Array(N*3);for(let i=0;i<N;i++){const r=4+Math.random()*6;const th=Math.random()*Math.PI*2;const ph=Math.acos(2*Math.random()-1);pos[i*3]=r*Math.sin(ph)*Math.cos(th);pos[i*3+1]=r*Math.sin(ph)*Math.sin(th);pos[i*3+2]=r*Math.cos(ph)-3;}
+const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(pos,3));
+const pts=new THREE.Points(pg,new THREE.PointsMaterial({size:.018,color:0xE8895A,transparent:true,opacity:.6}));scene.add(pts);
+let scrollY=0;addEventListener('scroll',()=>{scrollY=window.scrollY||0;});
+const clock=new THREE.Clock();let tmx=0,tmy=0;
+function animate(){requestAnimationFrame(animate);const t=clock.getElapsedTime();uniforms.uTime.value=t;
+tmx+=(mouseX-tmx)*.05;tmy+=(mouseY-tmy)*.05;uniforms.uMouse.value.set(tmx,-tmy);
+const sp=Math.min(scrollY/innerHeight,1);
+sphere.rotation.y=t*.12+tmx*.4;sphere.rotation.x=tmy*.3;sphere.position.x=1.2-sp*0.8;sphere.scale.setScalar(1+sp*0.3);
+pts.rotation.y=t*.02;
+cam.position.x+=(tmx*.6-cam.position.x)*.04;cam.position.y+=(-tmy*.4-cam.position.y)*.04;cam.position.z=5+sp*2.2;cam.lookAt(0,0,0);
+renderer.render(scene,cam);}
+if(!RM_GL)animate();else renderer.render(scene,cam);
+addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+})();
+// CTA flowing gradient mesh + constellation
+(function(){
+const canvas=document.getElementById('webgl2');if(!canvas)return;
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.8));
+const W=()=>canvas.clientWidth||innerWidth,H=()=>canvas.clientHeight||innerHeight;
+const scene=new THREE.Scene();const cam=new THREE.PerspectiveCamera(55,W()/H(),.1,100);cam.position.z=6;
+const u={uTime:{value:0}};
+const plane=new THREE.Mesh(new THREE.PlaneGeometry(22,14,80,50),new THREE.ShaderMaterial({uniforms:u,wireframe:true,transparent:true,
+vertexShader:'uniform float uTime;varying float vZ;'+SNOISE+'void main(){vec3 p=position;float n=snoise(vec3(p.x*0.25,p.y*0.25,uTime*0.15));p.z+=n*1.6;vZ=n;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);}',
+fragmentShader:'varying float vZ;void main(){vec3 coral=vec3(0.91,0.54,0.35);vec3 cool=vec3(0.43,0.55,0.66);vec3 col=mix(cool,coral,smoothstep(-1.0,1.0,vZ));gl_FragColor=vec4(col,0.16+0.12*smoothstep(0.0,1.0,vZ));}'}));
+plane.rotation.x=-Math.PI/3.2;plane.position.y=-1;scene.add(plane);
+const N=1100;const pos=new Float32Array(N*3);for(let i=0;i<N;i++){pos[i*3]=(Math.random()-.5)*16;pos[i*3+1]=(Math.random()-.5)*10;pos[i*3+2]=(Math.random()-.5)*8;}
+const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+const pts=new THREE.Points(g,new THREE.PointsMaterial({size:.03,color:0xE8895A,transparent:true,opacity:.65}));scene.add(pts);
+const clock=new THREE.Clock();let tmx=0,tmy=0;
+function animate(){requestAnimationFrame(animate);const t=clock.getElapsedTime();u.uTime.value=t;
+tmx+=(mouseX-tmx)*.04;tmy+=(mouseY-tmy)*.04;pts.rotation.y=t*.03;pts.rotation.x=tmy*.2;
+plane.rotation.z=Math.sin(t*.1)*.05+tmx*.1;cam.position.x+=(tmx*.8-cam.position.x)*.03;cam.lookAt(0,-1,0);
+renderer.render(scene,cam);}
+function resize(){renderer.setSize(W(),H(),false);cam.aspect=W()/H();cam.updateProjectionMatrix();}
+addEventListener('resize',resize);resize();
+if(!RM_GL)animate();else renderer.render(scene,cam);
+})();
+})();
+</script>
+</body></html>
