@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Platform Exam — Recovery Study Guide</title>
+<style>
+:root{
+  --bg:#13110e;
+  --bg2:#1a1714;
+  --card:#1e1b17;
+  --card-edge:#2d2822;
+  --ink:#ece7df;
+  --ink-dim:#a89f92;
+  --ink-faint:#6e6557;
+  --clay:#e8855b;
+  --amber:#f3b84c;
+  --grad:linear-gradient(92deg,#e8855b 0%,#f3b84c 100%);
+  --green:#7fc97f;
+  --red:#e06c6c;
+  --mono:ui-monospace,'SF Mono','Cascadia Code',Menlo,Consolas,monospace;
+  --serif:Charter,'Iowan Old Style',Georgia,'Times New Roman',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --rad:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(232,133,91,.35)}
+
+/* ---------- progress bar ---------- */
+#progress{position:fixed;top:0;left:0;height:4px;width:0%;background:var(--grad);z-index:100;border-radius:0 3px 3px 0}
+
+/* ---------- layout ---------- */
+.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:40px;max-width:1180px;margin:0 auto;padding:0 28px 120px}
+main{min-width:0}
+
+/* ---------- sidebar nav ---------- */
+#sidenav{position:sticky;top:24px;align-self:start;max-height:calc(100vh - 48px);overflow-y:auto;padding:18px 0 18px 4px}
+#sidenav .nav-label{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 10px 14px}
+#sidenav a{display:flex;gap:10px;align-items:baseline;padding:7px 14px;color:var(--ink-dim);text-decoration:none;font-size:13.5px;border-left:2px solid transparent;border-radius:0 8px 8px 0;transition:color .2s,background .2s,border-color .2s}
+#sidenav a .k{font-family:var(--mono);font-size:11px;color:var(--ink-faint);min-width:14px}
+#sidenav a:hover{color:var(--ink);background:rgba(255,255,255,.03)}
+#sidenav a.active{color:var(--clay);border-left-color:var(--clay);background:rgba(232,133,91,.07)}
+#sidenav a.active .k{color:var(--clay)}
+#navToggle{display:none}
+
+/* ---------- hero ---------- */
+.hero{padding:84px 0 46px}
+.hero .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--clay);margin-bottom:18px}
+.hero h1{font-family:var(--serif);font-weight:600;font-size:clamp(30px,4.6vw,46px);line-height:1.12;letter-spacing:-.01em;max-width:640px}
+.hero h1 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.scoreline{display:flex;align-items:baseline;gap:22px;margin-top:34px;flex-wrap:wrap}
+.bignum{font-family:var(--serif);font-size:clamp(58px,8vw,86px);font-weight:600;line-height:1;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums}
+.bignum small{font-size:.42em;color:var(--ink-faint);-webkit-text-fill-color:var(--ink-faint)}
+.pct{font-family:var(--mono);font-size:15px;color:var(--ink-dim)}
+.hero .sub{margin-top:18px;max-width:560px;color:var(--ink-dim);font-size:15.5px}
+
+/* ---------- dashboard ---------- */
+.panel{background:var(--bg2);border:1px solid var(--card-edge);border-radius:var(--rad);padding:28px;margin:26px 0}
+.panel h2{font-family:var(--serif);font-size:21px;font-weight:600;margin-bottom:6px}
+.panel .hint{font-size:13px;color:var(--ink-faint);margin-bottom:20px}
+.bar-row{display:grid;grid-template-columns:minmax(120px,210px) 1fr 52px;gap:14px;align-items:center;margin:13px 0;font-size:13.5px}
+.bar-row .lbl{color:var(--ink-dim)}
+.bar-track{height:9px;background:#26221c;border-radius:6px;overflow:hidden}
+.bar-fill{height:100%;width:0;background:var(--grad);border-radius:6px;transition:width 1.1s cubic-bezier(.22,.9,.3,1)}
+.bar-row.weak .bar-fill{background:linear-gradient(92deg,#c25b5b,#e8855b)}
+.bar-row .val{font-family:var(--mono);font-size:12px;color:var(--ink-dim);text-align:right}
+.in .bar-fill{width:var(--w)}
+
+/* ---------- mistake patterns panel ---------- */
+.trap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:6px}
+.trap-card{background:var(--card);border:1px solid var(--card-edge);border-radius:10px;padding:16px 18px}
+.trap-card h3{font-size:14px;margin-bottom:6px;color:var(--clay);display:flex;gap:8px;align-items:center}
+.trap-card p{font-size:13.5px;color:var(--ink-dim)}
+.trap-num{font-family:var(--mono);font-size:11px;border:1px solid rgba(232,133,91,.5);border-radius:5px;padding:1px 6px}
+
+/* ---------- toolbar ---------- */
+.toolbar{display:flex;gap:10px;justify-content:flex-end;margin:34px 0 4px}
+.toolbar button{font-family:var(--mono);font-size:12px;color:var(--ink-dim);background:var(--card);border:1px solid var(--card-edge);border-radius:8px;padding:7px 14px;cursor:pointer;transition:color .2s,border-color .2s}
+.toolbar button:hover{color:var(--clay);border-color:rgba(232,133,91,.5)}
+
+/* ---------- sections ---------- */
+section.theme{margin-top:58px}
+.theme-head{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--card-edge);padding-bottom:12px;margin-bottom:18px}
+.theme-head .tk{font-family:var(--mono);font-size:13px;color:var(--clay);background:rgba(232,133,91,.1);border:1px solid rgba(232,133,91,.3);border-radius:7px;padding:3px 9px}
+.theme-head h2{font-family:var(--serif);font-size:clamp(20px,2.6vw,26px);font-weight:600;letter-spacing:-.01em}
+
+/* ---------- cards / accordion ---------- */
+.card{background:var(--card);border:1px solid var(--card-edge);border-radius:var(--rad);margin:14px 0;overflow:hidden;opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease,border-color .25s}
+.card.revealed{opacity:1;transform:none}
+.card.open{border-color:rgba(232,133,91,.4)}
+.card-head{width:100%;display:flex;align-items:center;gap:14px;text-align:left;background:none;border:0;color:var(--ink);font:inherit;padding:17px 20px;cursor:pointer}
+.card-head:hover{background:rgba(255,255,255,.025)}
+.card-head .code{font-family:var(--mono);font-size:12px;color:var(--clay);background:rgba(232,133,91,.1);border-radius:6px;padding:2px 8px;flex:none}
+.card-head .t{font-weight:600;font-size:15.5px;flex:1}
+.chev{flex:none;width:9px;height:9px;border-right:2px solid var(--ink-faint);border-bottom:2px solid var(--ink-faint);transform:rotate(45deg);transition:transform .3s;margin-top:-4px}
+.card.open .chev{transform:rotate(225deg);margin-top:4px}
+.card-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .42s cubic-bezier(.4,0,.2,1)}
+.card.open .card-body{grid-template-rows:1fr}
+.card-body>.inner{overflow:hidden;min-height:0;opacity:0;transition:opacity .35s ease .05s}
+.card.open .card-body>.inner{opacity:1}
+.inner-pad{padding:6px 22px 24px}
+
+.blk{margin-top:18px}
+.blk h4{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.blk h4::before{content:"";width:14px;height:1px;background:var(--clay)}
+.blk p{font-size:14.5px;color:#cfc8bd;margin-bottom:8px}
+.blk p:last-child{margin-bottom:0}
+.blk strong{color:var(--ink)}
+.blk em{color:var(--amber);font-style:normal}
+.trap{display:inline-block;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;color:var(--amber);border:1px solid rgba(243,184,76,.45);border-radius:5px;padding:1px 7px;margin:0 4px 4px 0;vertical-align:1px}
+
+pre{background:#15120e;border:1px solid #2a251e;border-radius:10px;padding:15px 17px;overflow-x:auto;margin-top:4px}
+code{font-family:var(--mono);font-size:12.8px;line-height:1.6;color:#e3d9c7}
+pre .c{color:#7d7466}
+pre .k{color:var(--clay)}
+pre .s{color:#a7c98a}
+
+/* ---------- quiz ---------- */
+.quiz .q{font-weight:600;color:var(--ink)}
+.opt{display:block;width:100%;text-align:left;font:inherit;font-size:14px;color:var(--ink-dim);background:#19160f;border:1px solid #2c2720;border-radius:9px;padding:10px 14px;margin-top:8px;cursor:pointer;transition:border-color .2s,color .2s,background .2s}
+.opt:hover{border-color:rgba(232,133,91,.5);color:var(--ink)}
+.opt .key{font-family:var(--mono);font-size:12px;color:var(--clay);margin-right:8px}
+.quiz.done .opt{cursor:default;pointer-events:none}
+.opt.correct{border-color:var(--green);color:#d7ecd0;background:rgba(127,201,127,.08)}
+.opt.wrong{border-color:var(--red);color:#ecd3d3;background:rgba(224,108,108,.08)}
+.explain{display:none;margin-top:10px;font-size:13.5px;color:var(--ink-dim);border-left:2px solid var(--clay);padding:4px 0 4px 12px}
+.quiz.done .explain{display:block}
+
+/* ---------- back to top ---------- */
+#toTop{position:fixed;right:22px;bottom:22px;width:44px;height:44px;border-radius:50%;background:var(--grad);border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;transform:translateY(8px);z-index:90;box-shadow:0 6px 20px rgba(0,0,0,.45)}
+#toTop.show{opacity:1;pointer-events:auto;transform:none}
+#toTop span{width:10px;height:10px;border-left:2.5px solid #1b150e;border-top:2.5px solid #1b150e;transform:rotate(45deg);margin-top:4px}
+
+footer{margin-top:80px;font-size:13px;color:var(--ink-faint);border-top:1px solid var(--card-edge);padding-top:24px}
+
+/* ---------- responsive ---------- */
+@media (max-width:880px){
+  .layout{grid-template-columns:1fr;gap:0;padding:0 18px 90px}
+  #navToggle{display:flex;align-items:center;gap:10px;width:100%;position:sticky;top:8px;z-index:80;background:var(--bg2);border:1px solid var(--card-edge);border-radius:10px;color:var(--ink);font:inherit;font-size:14px;padding:11px 16px;cursor:pointer;margin-top:14px}
+  #navToggle .chev{margin-left:auto}
+  #sidenav{position:static;max-height:none;display:none;background:var(--bg2);border:1px solid var(--card-edge);border-top:0;border-radius:0 0 10px 10px;padding:10px 0;margin-top:-2px}
+  #sidenav.open{display:block}
+  .hero{padding:46px 0 30px}
+  .bar-row{grid-template-columns:1fr;gap:5px}
+  .bar-row .val{text-align:left}
+}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition:none!important;animation:none!important}
+  .card{opacity:1;transform:none}
+  .bar-fill{width:var(--w)}
+}
+</style>
+</head>
+<body>
+<div id="progress" aria-hidden="true"></div>
+<div class="layout">
+
+<button id="navToggle" aria-expanded="false">Jump to a theme <span class="chev"></span></button>
+<nav id="sidenav" aria-label="Themes">
+  <p class="nav-label">Themes</p>
+  <a href="#theme-a"><span class="k">A</span>Deterministic vs probabilistic</a>
+  <a href="#theme-b"><span class="k">B</span>tool_choice &amp; thinking</a>
+  <a href="#theme-c"><span class="k">C</span>Identity disambiguation</a>
+  <a href="#theme-d"><span class="k">D</span>Context &amp; parallelism</a>
+  <a href="#theme-e"><span class="k">E</span>Claude Code config</a>
+  <a href="#theme-f"><span class="k">F</span>Technique matching</a>
+  <a href="#theme-g"><span class="k">G</span>Multi-agent systems</a>
+  <a href="#theme-h"><span class="k">H</span>Built-in tools &amp; MCP</a>
+  <a href="#theme-i"><span class="k">I</span>Message Batches API</a>
+  <a href="#theme-j"><span class="k">J</span>CI / automated review</a>
+  <a href="#theme-k"><span class="k">K</span>Structured extraction</a>
+</nav>
+
+<main>
+<header class="hero">
+  <p class="eyebrow">Claude Platform · Applied Exam Recovery</p>
+  <h1>Every question you missed, <em>re-taught from the mechanism up.</em></h1>
+  <div class="scoreline">
+    <div class="bignum"><span id="countScore">0</span><small>/60</small></div>
+    <div class="pct"><span id="countPct">0</span>% — eleven themes, fifty-three topics, zero skipped</div>
+  </div>
+  <p class="sub">This guide covers exactly the items you got wrong: Agent SDK, Claude Code, MCP, the Batches API, multi-agent orchestration and structured extraction. Each card explains the mechanism, the canonical design, and why the distractor you picked was tempting — and wrong.</p>
+</header>
+
+<div class="panel" id="dashboard">
+  <h2>Where the points went</h2>
+  <p class="hint">Per-scenario score. Scenarios 4 and 5 are where the structural-vs-prompt trap cost you most.</p>
+  <div class="bar-row" style="--w:50%"><span class="lbl">1 · Support Agent</span><div class="bar-track"><div class="bar-fill"></div></div><span class="val">5/10</span></div>
+  <div class="bar-row" style="--w:60%"><span class="lbl">2 · Code Generation</span><div class="bar-track"><div class="bar-fill"></div></div><span class="val">6/10</span></div>
+  <div class="bar-row" style="--w:50%"><span class="lbl">3 · Multi-Agent</span><div class="bar-track"><div class="bar-fill"></div></div><span class="val">5/10</span></div>
+  <div class="bar-row weak" style="--w:30%"><span class="lbl">4 · Developer Productivity</span><div class="bar-track"><div class="bar-fill"></div></div><span class="val">3/10</span></div>
+  <div class="bar-row weak" style="--w:40%"><span class="lbl">5 · CI/CD</span><div class="bar-track"><div class="bar-fill"></div></div><span class="val">4/10</span></div>
+  <div class="bar-row" style="--w:60%"><span class="lbl">6 · Data Extraction</span><div class="bar-track"><div class="bar-fill"></div></div><span class="val">6/10</span></div>
+</div>
+
+<div class="panel">
+  <h2>Your recurring mistake patterns</h2>
+  <p class="hint">Read these before any card. Most lost points reduce to one of the four shapes below.</p>
+  <div class="trap-grid">
+    <div class="trap-card"><h3><span class="trap-num">TRAP 1</span> Bigger budget ≠ fix</h3><p>A bigger model, larger context window, more retries or more budget never fixes a <strong>category</strong> problem: incompatibility, missing inheritance, shape-vs-semantics, or relevance. If the thing was never passed, never compatible, or never validated, scaling resources changes nothing.</p></div>
+    <div class="trap-card"><h3><span class="trap-num">TRAP 2</span> Prompt patch ≠ guarantee</h3><p>"Add a system-prompt instruction" is probabilistic — it has a non-zero non-compliance rate on every invocation. Whenever a structural or deterministic fix exists (server-side gate, schema, scoped tools), the prompt directive is almost always the <strong>weakest</strong> option offered.</p></div>
+    <div class="trap-card"><h3><span class="trap-num">SHAPE 1</span> EXCEPT / FALSE stems</h3><p>Three options will be true statements; you are hunting the one false one. Slow down and test each option independently against the mechanism — don't pattern-match to the first plausible-sounding line.</p></div>
+    <div class="trap-card"><h3><span class="trap-num">SHAPE 2</span> LEAST / weakest stems</h3><p>All four options "work" to some degree; you must rank them. The prompt-only option is usually the LEAST effective; the deterministic, structural option usually wins "most effective."</p></div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button id="expandAll" type="button">Expand all</button>
+  <button id="collapseAll" type="button">Collapse all</button>
+</div>
+
+<!-- ================= THEME A ================= -->
+<section class="theme" id="theme-a">
+<div class="theme-head"><span class="tk">THEME A</span><h2>Deterministic vs probabilistic enforcement</h2></div>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">A1</span><span class="t">Financial / safety ceilings live in the tool, not the prompt</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>A prompt instruction is advice the model <em>usually</em> follows; a server-side check is a law the system <em>always</em> enforces. Language models are probabilistic samplers, so any behavioral instruction — "never refund more than $500" — has a non-zero non-compliance rate per invocation, and that rate compounds across thousands of calls. A validation inside the <code>process_refund</code> tool implementation runs deterministically on <strong>every</strong> invocation path, including calls made by delegated subagents, retried turns, and adversarially-prompted sessions. The model can be confused, jailbroken or simply unlucky; the server cannot. Note the subtle distractor: prompts absolutely <em>can</em> express a numeric threshold ("$500") — expressibility is not the problem. <strong>Probabilistic adherence</strong> is the problem.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Enforce the ceiling inside the tool/server: the refund endpoint itself rejects any <code>amount &gt; 500</code> without an approval token, returning a structured error the model can relay. The prompt may still mention the policy for UX, but the guarantee comes from code.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">TRAP 2 · prompt patch</span> "Strengthen the system prompt" sounds responsive and is the easiest edit — but it is the weakest option whenever a deterministic alternative exists. <span class="trap">DISTRACTOR</span> "Prompts can't represent numeric limits" is a false rationale; reject any option justified that way. Also wrong: relying on the coordinator's prompt when subagents call the tool directly — their invocations never pass through the coordinator's instructions.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code><span class="c"># inside the MCP / tool server — runs on EVERY call</span>
+def process_refund(order_id, amount, approval_token=None):
+    if amount &gt; 500 and not verify_approval(approval_token):
+        return {"status": "rejected",
+                "reason": "amounts over $500 require manager approval"}
+    return execute_refund(order_id, amount)</code></pre></div>
+<div class="blk quiz" data-a="C">
+<p class="q">Self-check — Why is a system-prompt ceiling of "$500 max refunds" insufficient?</p>
+<button class="opt"><span class="key">A</span>Prompts cannot express numeric thresholds</button>
+<button class="opt"><span class="key">B</span>The model can't do arithmetic comparisons</button>
+<button class="opt"><span class="key">C</span>Adherence is probabilistic per invocation; only server-side validation runs deterministically on every path</button>
+<button class="opt"><span class="key">D</span>System prompts are truncated above 1,000 tokens</button>
+<p class="explain">A prompt can state "$500" perfectly well — the failure is the non-zero non-compliance rate, which a server-side check eliminates.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">A2</span><span class="t">Programmatic prerequisite gates before financial actions</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>If a workflow has hard prerequisites — "no order lookup or refund until identity is verified" — the safest expression of that rule is a <em>gate in the execution layer</em>, not an ordering hint in the prompt. The gate inspects session state (was <code>get_customer</code> called with a verified result this session?) and refuses downstream tools until the precondition holds. This converts a soft behavioral preference into an invariant that survives model confusion, prompt drift, multi-turn forgetting, and subagent delegation. The model still chooses <em>how</em> to converse; it simply cannot reach the consequential action out of order. Gates compose: each sensitive tool can check the specific facts it requires.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Wrap <code>lookup_order</code> and <code>process_refund</code> in a check that a verified customer record exists in session state; return a structured "prerequisite not met: verify identity first" error otherwise. The error message itself steers the model back on track.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">TRAP 2 · prompt patch</span> "Tell the model to always verify first" merely lowers, never zeroes, the violation rate. <span class="trap">TRAP 1 · bigger budget</span> A smarter model is still sampling — capability does not produce a guarantee. Tool <em>descriptions</em> mentioning the prerequisite are also advisory only.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>def lookup_order(order_id, session):
+    if not session.get("verified_customer_id"):
+        return {"error": "PREREQ_IDENTITY",
+                "message": "Verify the customer before order access."}
+    ...</code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — The strongest way to ensure refunds never run before ID verification is:</p>
+<button class="opt"><span class="key">A</span>A bolded system-prompt rule placed first</button>
+<button class="opt"><span class="key">B</span>A server-side gate that rejects refund calls when session state lacks a verified ID</button>
+<button class="opt"><span class="key">C</span>A note in the refund tool's description field</button>
+<button class="opt"><span class="key">D</span>Upgrading to the largest model</button>
+<p class="explain">Only the execution-layer gate is deterministic; A and C are probabilistic, D is the bigger-budget trap.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">A3</span><span class="t">Identity-first deterministic ordering for support flows</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>The canonical support pipeline is a fixed causal chain: <code>get_customer</code> (verified) → <code>lookup_order</code> → eligibility check → <code>process_refund</code>. Each step's output is the next step's required input, so the ordering is not a stylistic preference — it is data dependency plus risk control. The architecture question is <em>where the ordering is enforced</em>. The right answer combines free conversation with a deterministic gate that blocks the financial step until all upstream facts (verified identity, real order, passing eligibility) exist in session state. This gives natural dialogue everywhere except the one place that must never go wrong.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Let the model converse and call read-only tools flexibly, but gate <code>process_refund</code> on programmatically-verified prerequisites: verified identity present, order belongs to that customer, eligibility check returned true. The gate is the enforcement; the prompt is just guidance.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">TRAP 2 · prompt patch</span> Options that "describe the ordering in the system prompt" are the weakest. Options that force every turn rigidly (e.g., <code>tool_choice</code> forcing) break conversation and still don't validate the <em>data</em> dependencies. The winner pairs flexibility with one deterministic chokepoint.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code><span class="c"># gate on the LAST, irreversible step</span>
+def process_refund(order_id, amount, session):
+    cust = session.get("verified_customer_id")
+    if not cust:                       return err("verify identity first")
+    if not owns(cust, order_id):       return err("order/customer mismatch")
+    if not session.get(f"elig:{order_id}"): return err("run eligibility check")
+    return refund(order_id, amount)</code></pre></div>
+<div class="blk quiz" data-a="D">
+<p class="q">Self-check — Where should the identity→order→eligibility→refund ordering be enforced?</p>
+<button class="opt"><span class="key">A</span>Numbered steps in the system prompt</button>
+<button class="opt"><span class="key">B</span>tool_choice forcing one specific tool per turn</button>
+<button class="opt"><span class="key">C</span>The model's extended thinking</button>
+<button class="opt"><span class="key">D</span>A deterministic gate on the financial step that verifies all prerequisites in session state</button>
+<p class="explain">One chokepoint at the irreversible action gives the guarantee while preserving natural conversation.</p>
+</div>
+</div></div></div>
+</article>
+</section>
+
+<!-- ================= THEME B ================= -->
+<section class="theme" id="theme-b">
+<div class="theme-head"><span class="tk">THEME B</span><h2>tool_choice &amp; extended thinking mechanics</h2></div>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">B1</span><span class="t">Extended thinking only works with tool_choice "auto" / "none"</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Extended thinking requires the assistant turn to <em>begin</em> with a thinking block the model generates freely. <code>tool_choice: "any"</code> and <code>tool_choice: {"type":"tool"}</code> work by <strong>prefilling</strong> the assistant turn with the start of a tool call — which collides with the requirement that thinking come first. The API therefore returns an error when extended thinking is combined with "any" or "tool"; only <code>"auto"</code> (model decides) and <code>"none"</code> (no tools) are compatible. This is a hard API incompatibility, a <em>category</em> constraint — no parameter tuning, larger thinking budget, or model upgrade changes it.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Keep thinking enabled with <code>tool_choice: "auto"</code>, and obtain your hard guarantee where guarantees belong: a deterministic prerequisite gate in the tool layer (Theme A). You get reasoning <em>and</em> enforcement, without fighting the API.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">TRAP 1 · bigger budget</span> Raising the thinking budget or swapping models cannot reconcile an incompatibility. <span class="trap">TRAP 2 · prompt patch</span> "Instruct it to always call the tool" with thinking on is probabilistic; the deterministic gate is the real answer. The distractor "disable thinking to force the tool" sacrifices the reasoning you were told to keep.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>{"model": "claude-sonnet-4-5",
+ "thinking": {"type": "enabled", "budget_tokens": 4096},
+ "tool_choice": {"type": "auto"},   <span class="c">// "any"/"tool" → API error</span>
+ "tools": [...]}</code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — You need extended thinking AND certainty a sensitive flow can't skip verification. Best config?</p>
+<button class="opt"><span class="key">A</span>thinking + tool_choice "any", with retries on error</button>
+<button class="opt"><span class="key">B</span>thinking + tool_choice "auto", plus a deterministic prerequisite gate in the tool server</button>
+<button class="opt"><span class="key">C</span>Disable thinking and force the tool with tool_choice "tool"</button>
+<button class="opt"><span class="key">D</span>thinking with a doubled budget and a stern system prompt</button>
+<p class="explain">"any"/"tool" + thinking errors out (A); C drops thinking; D is both traps at once. B keeps thinking and gets the guarantee structurally.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">B2</span><span class="t">Forced tool calls suppress natural-language preambles</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>When you force a tool with <code>"any"</code> or <code>"tool"</code>, the API prefills the assistant turn so that it <em>starts</em> with a <code>tool_use</code> block. There is no room for the model to emit text first — so "say a friendly sentence to the customer, then call the tool" is structurally impossible in that single turn. The missing preamble is not a verbosity setting, a <code>max_tokens</code> issue, or a thinking side-effect; it's the prefill mechanism itself. Understanding <em>why</em> rules out the distractors instantly: anything that doesn't remove the prefill can't restore the text.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Either switch to <code>tool_choice: "auto"</code> and instruct the model to respond with text before calling the tool, or split the work: emit the customer-facing message in one turn, then make the (forced) tool call in a separate turn.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Increase max_tokens" — the text isn't truncated, it was never generatable. <span class="trap">DISTRACTOR</span> "Disable extended thinking" — thinking is unrelated to the prefill. Both are plausible-sounding knobs that don't touch the mechanism.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code><span class="c">// forced: turn begins as {"type":"tool_use", ...} — no text possible</span>
+"tool_choice": {"type": "any"}
+<span class="c">// fix: let the model speak, then call</span>
+"tool_choice": {"type": "auto"}
+<span class="c">// system: "Briefly acknowledge the customer, then call lookup_order."</span></code></pre></div>
+<div class="blk quiz" data-a="C">
+<p class="q">Self-check — With tool_choice "any", no greeting text ever appears before the tool call because:</p>
+<button class="opt"><span class="key">A</span>max_tokens is consumed by the tool JSON</button>
+<button class="opt"><span class="key">B</span>Extended thinking absorbs the text</button>
+<button class="opt"><span class="key">C</span>Forcing prefills the assistant turn with a tool_use block, leaving no position for text</button>
+<button class="opt"><span class="key">D</span>The tool schema lacks a "message" property</button>
+<p class="explain">It's the prefill mechanic. Fix with "auto" + instruction, or a separate message turn.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">B3</span><span class="t">"any" + strict tool use = always a tool, always schema-exact</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>These two controls solve two different halves of one extraction problem. <code>tool_choice: "any"</code> guarantees the response <strong>is</strong> a tool call — never prose, never "I couldn't find a matching document type." Strict tool use guarantees the chosen tool's <strong>inputs</strong> conform exactly to its JSON schema — correct property names, types, required fields, no inventions. For a pipeline ingesting unknown document types where you define one tool per type, "any" forces the model to pick <em>some</em> classification tool, and strict mode makes whatever it emits machine-parseable. Either control alone leaves a gap: "auto" permits prose escapes; non-strict permits malformed payloads.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Define one tool per document type (or one with a type enum), set <code>tool_choice: "any"</code>, enable strict tool use, and parse with confidence downstream. (Cross-reference K3.)</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">SHAPE</span> Options offering only one of the two guarantees are partial answers. Remember the mapping: <em>"never prose" → "any"; "never malformed" → strict</em>. And remember what strict does NOT give you: semantic correctness (K1).</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>"tool_choice": {"type": "any"},
+"tools": [
+  {"name": "extract_invoice", "strict": true, "input_schema": {...}},
+  {"name": "extract_receipt", "strict": true, "input_schema": {...}},
+  {"name": "extract_contract","strict": true, "input_schema": {...}}]</code></pre></div>
+<div class="blk quiz" data-a="A">
+<p class="q">Self-check — Unknown doc types must ALWAYS yield a parseable tool call. Which pairing?</p>
+<button class="opt"><span class="key">A</span>tool_choice "any" + strict tool use</button>
+<button class="opt"><span class="key">B</span>tool_choice "auto" + strict tool use</button>
+<button class="opt"><span class="key">C</span>tool_choice "any" + higher temperature</button>
+<button class="opt"><span class="key">D</span>tool_choice "none" + a JSON-only prompt</button>
+<p class="explain">"any" removes the prose escape hatch; strict removes malformed inputs. B still allows prose; C/D guarantee nothing.</p>
+</div>
+</div></div></div>
+</article>
+</section>
+
+<!-- ================= THEME C ================= -->
+<section class="theme" id="theme-c">
+<div class="theme-head"><span class="tk">THEME C</span><h2>Identity / disambiguation safety</h2></div>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">C1</span><span class="t">Two matching profiles → ask, never guess</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>When an identity lookup returns two plausible profiles, every automatic tie-breaker — most recent activity, shared email domain, higher lifetime value, fuzzy name similarity — is a heuristic, and heuristics are sometimes wrong. Acting on the wrong identity is uniquely dangerous because the failure is <strong>silent</strong> (nothing errors; the wrong account just gets modified) and often <strong>irreversible</strong> (a refund issued, an address changed, PII disclosed to the wrong person). The expected cost of one wrong-identity action dwarfs the friction of one clarifying question. So the canonical behavior is to stop and request a disambiguating identifier the user can supply: order number, email on file, last four digits, billing zip.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Return both candidates' non-sensitive distinguishing facts, ask the customer for one discriminating identifier, and proceed only on an exact match. Encode this in the lookup tool's contract: an <code>ambiguous: true</code> status the agent must resolve before downstream calls.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Pick the most recently active" feels smart and usually works — "usually" is exactly the problem in a consequential, silent-failure setting. Confidence thresholds on heuristics are still heuristics. Risk asymmetry, not accuracy rate, decides this question.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>{"status": "ambiguous",
+ "candidates": [
+   {"id": "C-118", "hint": "j***@gmail.com, joined 2021"},
+   {"id": "C-907", "hint": "j***@acme.com, joined 2024"}],
+ "required": "ask user for order # or email on file"}</code></pre></div>
+<div class="blk quiz" data-a="D">
+<p class="q">Self-check — Lookup returns two "Jordan Lee" profiles. The agent should:</p>
+<button class="opt"><span class="key">A</span>Use the profile with the most recent order</button>
+<button class="opt"><span class="key">B</span>Prefer the one whose email domain matches the inbound address</button>
+<button class="opt"><span class="key">C</span>Choose the higher lifetime-value account</button>
+<button class="opt"><span class="key">D</span>Ask the customer for a disambiguating identifier before any account action</button>
+<p class="explain">All heuristics fail silently and possibly irreversibly on the wrong account; a clarifying question is cheap insurance.</p>
+</div>
+</div></div></div>
+</article>
+</section>
+
+<!-- ================= THEME D ================= -->
+<section class="theme" id="theme-d">
+<div class="theme-head"><span class="tk">THEME D</span><h2>Context, decomposition, parallelism</h2></div>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">D1</span><span class="t">Shared-context decomposition: resolve identity once</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>When one request spans several concerns (billing, shipping, account status) for the <em>same</em> customer, the naive decomposition gives each concern its own end-to-end flow — and each flow re-resolves the customer's identity. That wastes calls and, worse, creates <strong>cross-concern parameter bleed</strong>: independent resolutions can land on slightly different identifiers (an old email vs. a customer ID), so the concerns silently investigate different entities. The correct decomposition factors out the shared dependency: resolve identity <strong>once</strong>, pin the canonical ID, then fan the concerns out in parallel, each receiving the same resolved identity as an explicit input. Shared facts are resolved at the layer above the fan-out, exactly like hoisting an invariant out of a loop.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Step 1 (sequential): <code>get_customer</code> once → canonical ID. Step 2 (parallel): billing, shipping, account checks, each parameterized with that ID. Synthesis consumes all three.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Fully independent parallel flows" looks maximally parallel but triples identity calls and invites bleed. <span class="trap">DISTRACTOR</span> "Fully sequential everything" is safe but forfeits the latency win on genuinely independent concerns. Parallelize the independent part, share the dependent part.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>cust = get_customer(email)            <span class="c"># once</span>
+<span class="c"># same turn — parallel, all keyed to cust.id:</span>
+check_billing(cust.id) | check_shipping(cust.id) | check_account(cust.id)</code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — Three concerns for one customer. Best decomposition?</p>
+<button class="opt"><span class="key">A</span>Three independent flows, each resolving identity itself</button>
+<button class="opt"><span class="key">B</span>Resolve identity once, then investigate the three concerns in parallel with the shared ID</button>
+<button class="opt"><span class="key">C</span>One strictly sequential flow for everything</button>
+<button class="opt"><span class="key">D</span>Let each subagent decide whether to re-resolve</button>
+<p class="explain">B removes redundant calls and the divergent-identity bug while keeping the parallel speedup.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">D2</span><span class="t">Same-turn tool calls are unordered — dependents go in a later turn</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>All tool calls emitted in one assistant turn are dispatched as a <strong>set with no ordering guarantee</strong> — they may execute concurrently or in any order, and none of them can see another's result, because results only return in the <em>next</em> user turn as <code>tool_result</code> blocks. So a synthesis step that consumes four search results structurally cannot share a turn with those searches: at emission time the results don't exist. The dependency graph maps directly onto turns: independent siblings share a turn; anything downstream of a result waits for the following turn. The wall-clock math: four ~5s searches in parallel ≈ 5s, plus ~5s of synthesis in the next turn ≈ <strong>10s total</strong>, versus ~25s fully sequential.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Turn 1: emit all four search calls together. Turn 2: results come back; the model synthesizes. Two turns, not one and not five.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Emit the synthesis call fifth in the same turn — it's listed last, so it runs last." Declaration order is not execution order, and the inputs wouldn't exist anyway. Map dependency → turn boundary, always.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>Turn 1 (assistant): search(q1) search(q2) search(q3) search(q4)  <span class="c"># ~5s, parallel</span>
+Turn 2 (user):      4 × tool_result
+Turn 2 (assistant): synthesize(...)                              <span class="c"># ~5s → ≈10s total</span></code></pre></div>
+<div class="blk quiz" data-a="C">
+<p class="q">Self-check — Why can't synthesis be a fifth call in the same turn as the four searches?</p>
+<button class="opt"><span class="key">A</span>Five calls exceed the per-turn limit</button>
+<button class="opt"><span class="key">B</span>Synthesis tools can't be parallelized by the API</button>
+<button class="opt"><span class="key">C</span>Same-turn calls are unordered and can't consume each other's results — those arrive next turn</button>
+<button class="opt"><span class="key">D</span>It can, if listed last in the content array</button>
+<p class="explain">Order within a turn carries no execution semantics; dependent work belongs to the turn after results return.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">D3</span><span class="t">disable_parallel_tool_use limits count, not order</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p><code>disable_parallel_tool_use: true</code> constrains the model to emit <strong>at most one</strong> tool call per assistant turn. That is a cap on the <em>count</em> of simultaneous calls — a throttle. It does not let you choreograph the <em>sequence</em> of operations, does not make calls within a turn execute in declaration order (with the flag there's only ever one), and does not encode dependencies. People reach for it hoping to "make calls run in order," but ordering across operations is achieved by turn structure and by deterministic gates, not by this flag. Use it when downstream systems can't tolerate concurrency (rate limits, non-reentrant tools), not as a sequencing mechanism.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Need serialization for safety? Use the flag. Need a specific <em>order</em> with data dependencies? Structure turns (D2) and gate prerequisites (A2). Different problems, different tools.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> Conflating "one at a time" with "in the order I want." The flag guarantees the former and says nothing about the latter — the model still chooses <em>which</em> single tool to call each turn.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>"tool_choice": {"type": "auto", "disable_parallel_tool_use": true}
+<span class="c"># effect: ≤1 tool_use block per assistant turn. Nothing about ordering.</span></code></pre></div>
+<div class="blk quiz" data-a="A">
+<p class="q">Self-check — disable_parallel_tool_use guarantees:</p>
+<button class="opt"><span class="key">A</span>At most one tool call per turn — a count limit only</button>
+<button class="opt"><span class="key">B</span>Calls execute in the order declared</button>
+<button class="opt"><span class="key">C</span>Dependent calls wait for their inputs</button>
+<button class="opt"><span class="key">D</span>The model picks the correct tool first</button>
+<p class="explain">It throttles concurrency; sequencing comes from turn structure and gates.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">D4</span><span class="t">Long-conversation decay: match each fix to its failure</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Long sessions degrade through <strong>three distinct failure modes</strong>, and each needs its own fix — "fits in context" is not the same as "attended to." (1) <em>Lost specifics</em>: concrete case facts stated early stop being used → periodically re-inject a compact, current case-facts block near the end of context. (2) <em>Position effect</em>: material buried mid-context gets weak attention → front-load critical instructions/facts under a clearly labeled header where attention is strong. (3) <em>Window pressure</em>: verbose tool outputs flood the window until old content is squeezed out → trim at the <strong>source</strong> (tool returns concise summaries, server-side filtering) rather than after damage. A question describing all three symptoms wants the matched triple, not one generic remedy.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Re-injected case-facts block + front-loading under a header + source-side trimming of tool output — each targeting its own mechanism.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">TRAP 1 · bigger budget</span> "Use a larger context window" only delays window pressure and does nothing for attention position or fact staleness — a relevance/attention problem is a category a bigger window can't buy out of.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code><span class="c">## CASE FACTS (current — re-injected every N turns)</span>
+- customer: C-118 (verified)   - order: O-5521, $349
+- issue: damaged on arrival    - decided: replacement approved</code></pre></div>
+<div class="blk quiz" data-a="D">
+<p class="q">Self-check — Early facts ignored, mid-context rules skipped, window overflowing with tool logs. Fix?</p>
+<button class="opt"><span class="key">A</span>Switch to the largest context window available</button>
+<button class="opt"><span class="key">B</span>Re-inject facts only</button>
+<button class="opt"><span class="key">C</span>Ask the model to "pay close attention to earlier messages"</button>
+<button class="opt"><span class="key">D</span>Re-inject a case-facts block + front-load critical content under a header + trim tool output at the source</button>
+<p class="explain">Three mechanisms, three matched fixes. A is the budget trap; C is the prompt trap.</p>
+</div>
+</div></div></div>
+</article>
+</section>
+
+<!-- ================= THEME E ================= -->
+<section class="theme" id="theme-e">
+<div class="theme-head"><span class="tk">THEME E</span><h2>Claude Code configuration</h2></div>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">E1</span><span class="t">.claude/rules/ path globs gate activation</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>A rule file in <code>.claude/rules/</code> can declare a <code>paths</code> glob in its frontmatter. The glob is an <strong>activation gate</strong>: the rule loads into context only when Claude is working on a file matching the pattern. Multiple globs on one rule are <strong>OR</strong>'d — matching any one activates it. Matching is against the file paths being edited, independent of which directory you launched Claude from. The recurring distractor is that globs control <em>display order</em> or <em>priority</em> — they do not; they control nothing except whether the rule is in play at all. This keeps context lean: API conventions load only when touching <code>api/**</code>, test rules only when touching <code>*.test.ts</code>.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Scope each rule with the narrowest glob(s) that cover its domain; rely on OR semantics for multi-area rules; never expect globs to order or rank rules.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Globs set the order rules display in" — false. <span class="trap">DISTRACTOR</span> "Rules apply only when running from that directory" — activation is path-of-edited-file based, directory-independent.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>--- <span class="c"># .claude/rules/api-conventions.md</span>
+paths:
+  - "src/api/**/*.ts"
+  - "src/server/**/*.ts"   <span class="c"># OR — either match activates</span>
+---
+All endpoints validate input with zod before handlers run.</code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — A rule has two paths globs. When does it load?</p>
+<button class="opt"><span class="key">A</span>Only when a file matches both globs</button>
+<button class="opt"><span class="key">B</span>When the edited file matches either glob, regardless of working directory</button>
+<button class="opt"><span class="key">C</span>Always — globs only set display order</button>
+<button class="opt"><span class="key">D</span>Only when Claude is launched from a matching directory</button>
+<p class="explain">Globs gate activation, OR'd, directory-independent. They never set order.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">E2</span><span class="t">CLAUDE.md precedence: enterprise > project > user</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>CLAUDE.md memory exists at multiple levels, and on a direct conflict the hierarchy is <strong>enterprise (managed policy) &gt; project &gt; user</strong>. The logic mirrors any org's policy stack: company-wide mandates outrank a repo's conventions, which outrank one developer's personal preferences. Non-conflicting instructions from all levels combine; precedence only matters when two levels disagree on the same point. Knowing the direction matters for exam stems like "the project file says tabs, the user file says spaces, enterprise says spaces" — enterprise and project each beat user, enterprise beats project.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Put organization-wide invariants (security, compliance) at enterprise level; team/repo conventions at project level; personal style at user level — and expect exactly that override order.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Most specific wins" intuition from CSS suggests user (most local) should win — here governance flows top-down instead. Memorize the direction.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>enterprise: "Never commit directly to main"   <span class="c"># wins all conflicts</span>
+project:    "Use pnpm, not npm"               <span class="c"># wins vs user</span>
+user:       "I prefer verbose explanations"   <span class="c"># lowest</span></code></pre></div>
+<div class="blk quiz" data-a="C">
+<p class="q">Self-check — Project CLAUDE.md conflicts with user CLAUDE.md, and enterprise policy conflicts with both. Who wins?</p>
+<button class="opt"><span class="key">A</span>User — most specific to the developer</button>
+<button class="opt"><span class="key">B</span>Project — closest to the code</button>
+<button class="opt"><span class="key">C</span>Enterprise, then project, then user</button>
+<button class="opt"><span class="key">D</span>Whichever file was modified most recently</button>
+<p class="explain">Governance is top-down: enterprise &gt; project &gt; user.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">E3</span><span class="t">Plan mode for ambiguity; direct execution for mechanical changes</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Plan mode is a read-only deliberation phase: Claude explores the codebase and proposes an approach for approval before any edits. Its value is proportional to <strong>decision risk</strong> — architectural ambiguity, several competing viable approaches, changes fanning across many files. There, choosing wrong is expensive, so you plan first, get sign-off, then switch to direct execution to implement the approved plan. For a single-outcome mechanical change — rename one function, fix a typo'd import — there is no decision to deliberate; plan mode adds a round-trip with zero risk reduction. The exam pattern: identify which scenario has genuine ambiguity and pair plan→execute with it; pair direct execution with the mechanical one.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Competing approaches / many files → plan mode to choose, then execute. One obvious change → direct execution immediately.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Always use plan mode for safety" — ceremony without benefit on mechanical edits. <span class="trap">DISTRACTOR</span> "Stay in plan mode to implement" — plan mode doesn't write; implementation needs execution.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>"Migrate session storage from Redis to Postgres" → plan mode
+   (schema? migration strategy? 30+ call sites?)  → approve → execute
+"Rename getUserById → fetchUserById"              → direct execution</code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — Which task justifies plan mode first?</p>
+<button class="opt"><span class="key">A</span>Fix a misspelled variable in one file</button>
+<button class="opt"><span class="key">B</span>Restructure auth across many files where two competing approaches exist</button>
+<button class="opt"><span class="key">C</span>Add a missing semicolon flagged by lint</button>
+<button class="opt"><span class="key">D</span>Bump a patch version in package.json</button>
+<p class="explain">Plan mode earns its round-trip only where there's an architectural decision to make.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">E4</span><span class="t">Skill/command frontmatter: fork, allowed-tools, argument-hint</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Three operational needs map to three composable frontmatter fields. <code>context: fork</code> runs the work in a <strong>forked, isolated context</strong> so verbose intermediate output (test logs, build noise) never pollutes the main conversation — only the result returns. <code>allowed-tools</code> <strong>restricts the tool surface</strong> (e.g., read-only tools only), structurally preventing destructive writes rather than asking nicely. <code>argument-hint</code> tells the interface what argument to <strong>prompt the user for</strong> (e.g., a ticket ID). Because they're orthogonal, one definition can use all three. Bonus fact: when a skill and a command share a name, the <strong>skill is selected</strong>.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Verbose output → <code>context: fork</code>. Must-not-write → <code>allowed-tools</code> whitelist. Needs an input → <code>argument-hint</code>. Compose as needed.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">TRAP 2 · prompt patch</span> "Tell it not to use Write in the body text" is probabilistic; <code>allowed-tools</code> is the structural version. Also: name clash → skill wins, not command, not "newest file."</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>---
+name: audit-deps
+context: fork              <span class="c"># isolate noisy scanner output</span>
+allowed-tools: Read, Grep, Glob   <span class="c"># no Write/Edit/Bash → can't mutate</span>
+argument-hint: "package name to audit"
+---</code></pre></div>
+<div class="blk quiz" data-a="A">
+<p class="q">Self-check — Need: isolate verbose output, forbid writes, prompt for a package name. Which fields?</p>
+<button class="opt"><span class="key">A</span>context: fork + allowed-tools + argument-hint</button>
+<button class="opt"><span class="key">B</span>A system-prompt instruction covering all three</button>
+<button class="opt"><span class="key">C</span>allowed-tools alone</button>
+<button class="opt"><span class="key">D</span>argument-hint + a "be careful" note</button>
+<p class="explain">Three orthogonal needs, three composable fields. B is the prompt trap.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">E5</span><span class="t">fork_session vs --resume vs fresh-with-summary</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Three session mechanisms answer three questions about prior context. <code>fork_session</code>: "I want to try <strong>multiple divergent directions</strong> from the same baseline" — each fork starts from an identical snapshot and evolves independently, perfect for A/B'ing approaches. <code>--resume</code>: "the prior context is <strong>still mostly valid</strong> and I'm continuing the same line of work" — cheapest, keeps everything. Fresh session seeded with a structured summary: "prior results are <strong>stale or polluted</strong> (the code has since changed, dead ends accumulated), but the distilled conclusions are worth carrying" — you write the summary, start clean, and inject it. Pick by asking: is old context valid (resume), branch-worthy (fork), or stale-but-summarizable (fresh+summary)?</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Diverging experiments from a shared baseline → fork. Continuing valid work → resume. Stale context with reusable conclusions → fresh session + structured summary.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> Resuming when the codebase moved on drags stale assumptions forward; forking when you just want to continue wastes the branch semantics. Match the mechanism to context validity, not habit.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>Try optimistic-locking AND queue-based fixes from today's baseline → fork ×2
+Continue this morning's half-done refactor                       → --resume
+Last week's debug session; repo changed; keep the 5 findings     → fresh + summary.md</code></pre></div>
+<div class="blk quiz" data-a="C">
+<p class="q">Self-check — Prior session's exploration is outdated, but its conclusions matter. Best move?</p>
+<button class="opt"><span class="key">A</span>--resume and hope stale parts are ignored</button>
+<button class="opt"><span class="key">B</span>fork_session twice</button>
+<button class="opt"><span class="key">C</span>Fresh session seeded with a structured summary of the conclusions</button>
+<button class="opt"><span class="key">D</span>Paste the entire old transcript into a new session</button>
+<p class="explain">Stale context shouldn't be carried wholesale (A, D); forking copies the staleness too (B).</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">E6</span><span class="t">Risky multi-file mutations: one per turn, not one batch</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>When several <em>mutating</em> calls (file edits, migrations) are batched in one parallel turn, a failure in one call <strong>cancels its in-flight siblings</strong> — some mutations have landed, some were cancelled mid-flight, and you're left with <strong>partial state</strong> that's hard to even enumerate, let alone roll back. Parallel batching is a latency optimization designed for independent <em>reads</em>; mutations carry consistency requirements that the cancellation behavior violates. Sequencing risky mutations one per turn means each either completes or fails <em>cleanly and visibly</em> before the next begins, giving you a checkpoint and an obvious resume point after any failure.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Reads: batch freely. Risky writes: one mutation per turn, verify, proceed. Treat each write turn as a checkpointed transaction step.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Batch all five edits for speed" — speed is real, but the failure mode (partial, ambiguous state from sibling cancellation) is exactly what the question is probing.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>BAD : Turn 1 → edit A + edit B + edit C   <span class="c"># B fails → C cancelled, A landed</span>
+GOOD: Turn 1 → edit A ✓ · Turn 2 → edit B ✗ stop, fix · Turn 3 → edit B ✓ …</code></pre></div>
+<div class="blk quiz" data-a="D">
+<p class="q">Self-check — Why sequence risky multi-file mutations one per turn?</p>
+<button class="opt"><span class="key">A</span>Parallel calls exceed rate limits</button>
+<button class="opt"><span class="key">B</span>Edits are faster sequentially</button>
+<button class="opt"><span class="key">C</span>The Edit tool can't run in parallel</button>
+<button class="opt"><span class="key">D</span>One failed mutating call cancels in-flight siblings, leaving partial, ambiguous state</button>
+<p class="explain">Sibling cancellation creates un-checkpointed partial state; sequencing makes every step atomic and visible.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">E7</span><span class="t">Headless mode: slash commands don't run under claude -p</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>User-invoked slash commands are an <strong>interactive-session feature</strong>. Under headless <code>claude -p "..."</code>, typing <code>/review-pr</code> in the prompt doesn't execute the command — the model just sees the literal text and <em>narrates</em> what reviewing might look like. This is a category incompatibility between an interactive affordance and a non-interactive runner. The fix is to express the task natively for headless: inline the actual task as an explicit prompt, and supply the standards/criteria the command embodied via <code>CLAUDE.md</code> or <code>--append-system-prompt</code>. Knobs that don't address the incompatibility — <code>--output-format json</code> (formats output, doesn't execute commands) or relocating the command file (location was never the issue) — change nothing.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p><code>claude -p "Review the diff in HEAD against our review checklist" --append-system-prompt "$(cat review-criteria.md)"</code> — task inlined, criteria injected.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">TRAP 1 · category</span> No flag or file move makes an interactive feature exist headlessly. <span class="trap">DISTRACTOR</span> "--output-format json" is a classic plausible-knob distractor: real flag, wrong layer.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code><span class="c"># BAD — model only narrates:</span>
+claude -p "/security-review src/"
+<span class="c"># GOOD:</span>
+claude -p "Audit src/ for the issues in our security checklist; report file:line." \
+  --append-system-prompt "$(cat .claude/checklists/security.md)"</code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — In CI, claude -p "/lint-fix" only describes linting. Fix?</p>
+<button class="opt"><span class="key">A</span>Add --output-format json</button>
+<button class="opt"><span class="key">B</span>Inline the task as an explicit prompt and pass criteria via CLAUDE.md or --append-system-prompt</button>
+<button class="opt"><span class="key">C</span>Move the command file to the project root</button>
+<button class="opt"><span class="key">D</span>Retry with a larger model</button>
+<p class="explain">Slash commands are interactive-only; headless needs the task and criteria expressed directly. A/C touch the wrong layer; D is the budget trap.</p>
+</div>
+</div></div></div>
+</article>
+</section>
+
+<!-- ================= THEME F ================= -->
+<section class="theme" id="theme-f">
+<div class="theme-head"><span class="tk">THEME F</span><h2>Technique-to-situation matching</h2></div>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">F1</span><span class="t">Examples vs interview vs test-driven iteration</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Three prompting/working techniques map to three distinct epistemic situations, and the exam tests the mapping. <strong>Concrete input/output examples</strong> fit when the transform is <em>fully specified in your head</em> but the model maps it inconsistently — examples nail down the mapping more precisely than prose ever can. <strong>Interview pattern</strong> (have Claude ask you questions before working) fits an <em>unfamiliar domain where you can't yet name the failure modes</em> — you don't know what to specify, so let the model elicit the requirements. <strong>Test-driven iteration</strong> (write the test suite first, iterate until green) fits a <em>behavior-rich component with many enumerable edge cases and regression risk</em> — the tests become the executable specification and the regression net. Diagnose the situation first: do I know the spec exactly (examples), not at all (interview), or as a list of behaviors (tests)?</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Known-but-misapplied transform → few-shot examples. Unknown unknowns → interview pattern. Enumerable behaviors + regression risk → tests first, then iterate.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> Each technique sounds universally good, so any pairing feels defensible. Anchor on the <em>knowledge state</em>: full spec / no spec / spec-as-behaviors. Cross-pairings (interviewing about a transform you fully know; examples for a domain you can't characterize) waste the technique's mechanism.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>"Reformat dates like these 5 samples"        → examples (spec is exact)
+"Build a HIPAA intake flow — new domain"     → interview (elicit failure modes)
+"Currency rounding util, 23 edge cases"      → write tests first, iterate to green</code></pre></div>
+<div class="blk quiz" data-a="C">
+<p class="q">Self-check — A parser with dozens of enumerable edge cases keeps regressing as features land. Best technique?</p>
+<button class="opt"><span class="key">A</span>More few-shot examples in the prompt</button>
+<button class="opt"><span class="key">B</span>Interview pattern</button>
+<button class="opt"><span class="key">C</span>Write the full test suite first; iterate until it passes</button>
+<button class="opt"><span class="key">D</span>A larger model</button>
+<p class="explain">Enumerable edge cases + regression risk is the test-driven signature: the suite is both spec and safety net.</p>
+</div>
+</div></div></div>
+</article>
+</section>
+
+<!-- ================= THEME G ================= -->
+<section class="theme" id="theme-g">
+<div class="theme-head"><span class="tk">THEME G</span><h2>Multi-agent systems</h2></div>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">G1</span><span class="t">Coordinator hooks don't fire inside subagents</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Hooks are bound to the session that registers them. A coordinator's <code>PreToolUse</code>/<code>PostToolUse</code> hooks fire for the coordinator's <em>own</em> tool calls — they do <strong>not</strong> fire for tool calls made inside a delegated subagent's isolated run. A <code>SubagentStop</code> hook is not a substitute: it fires <strong>once, on the subagent's completion</strong>, not once per tool call, so it cannot replicate per-call auditing or blocking. If a guarantee must hold for every tool invocation regardless of who makes it, enforce it where every call converges — the tool/server layer — or route results through the coordinator so its hooks see them. This is the multi-agent version of A1: per-call enforcement lives below the agents.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Audit/validation that must cover subagent calls → implement in the tool server (or via the subagent's own hooks), not the coordinator's hooks. Use SubagentStop only for completion-time actions.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "SubagentStop replicates PostToolUse" — wrong granularity: one completion event ≠ N per-tool events. <span class="trap">TRAP 2</span> "Prompt the subagent to self-report each call" is probabilistic.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>coordinator PostToolUse ──fires──▶ coordinator's calls only
+subagent tool calls     ──────▶ (no coordinator hook fires)
+SubagentStop            ──fires once──▶ at completion, not per call
+✔ guarantee per-call → enforce in the tool server</code></pre></div>
+<div class="blk quiz" data-a="D">
+<p class="q">Self-check — Every tool call (including subagents') must be logged. Where?</p>
+<button class="opt"><span class="key">A</span>Coordinator PostToolUse hook</button>
+<button class="opt"><span class="key">B</span>SubagentStop hook</button>
+<button class="opt"><span class="key">C</span>A system-prompt instruction to self-log</button>
+<button class="opt"><span class="key">D</span>In the tool/server layer all calls pass through</button>
+<p class="explain">A misses subagent calls; B fires once per subagent, not per call; C is probabilistic; D sees everything.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">G2</span><span class="t">Subagent context is isolated — pass findings explicitly</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>A subagent starts with a <strong>fresh, isolated context</strong>: it does not inherit the coordinator's conversation history, and it cannot see sibling subagents' findings. Anything it must know has to be placed <strong>explicitly in its prompt</strong> by the coordinator. When a synthesis subagent produces output ignoring what research subagents found, the cause is almost always that the findings were never passed in — an inheritance problem, which is a <em>category</em> problem. A bigger context budget cannot surface content that was never inherited; there is nothing in the window to attend to. The coordinator's job is precisely this plumbing: collect each subagent's results and inject the relevant ones into the next subagent's prompt.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Coordinator gathers structured findings from each subagent and embeds them verbatim (or summarized) in the synthesis subagent's prompt. Explicit hand-off, every time.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">TRAP 1 · bigger budget</span> "Give the synthesis agent a larger context window" — the data isn't IN the context at any size. Inheritance is binary: passed or not.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>synthesis_prompt = f"""Synthesize a report from these findings:
+== Agent A (pricing) ==\n{a.findings}
+== Agent B (competitors) ==\n{b.findings}
+== Agent C (regulation) ==\n{c.findings}"""</code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — Synthesis subagent ignores researchers' findings. Most likely cause?</p>
+<button class="opt"><span class="key">A</span>Its context window is too small</button>
+<button class="opt"><span class="key">B</span>Findings were never passed into its prompt — subagent contexts are isolated</button>
+<button class="opt"><span class="key">C</span>Its temperature is too high</button>
+<button class="opt"><span class="key">D</span>The model is too small to synthesize</button>
+<p class="explain">No auto-inheritance exists; A and D are the bigger-budget trap applied to a missing-data category problem.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">G3</span><span class="t">Subagent misusing tools: remove/scope tools, don't just instruct</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>A synthesis subagent that keeps launching ad-hoc searches has a <strong>capability problem</strong>, not a persuasion problem. Structural fixes change what is possible: remove the search tools from its definition; scope each agent's toolset to its role; or provide a narrow, purpose-built tool (e.g., <code>request_followup(topic)</code>) and route genuinely complex cases back through the coordinator. A system-prompt directive — "do not search; only synthesize" — changes only what is <em>likely</em>, and on a LEAST-effective ranking it does the least. The general principle: when behavior must not happen, prefer making it impossible over making it discouraged.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Strip search tools from the synthesis agent's <code>tools</code> list (or scope tools per role); add a narrow escalation tool if some follow-up capability is genuinely needed.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">TRAP 2 · prompt patch</span> The directive option always <em>sounds</em> sufficient. In "which does the LEAST" stems it's the answer; in "which is BEST" stems the structural option is.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>synthesis_agent = {"tools": []}                 <span class="c"># can't search — period</span>
+<span class="c"># or:</span> {"tools": ["request_followup"]}          <span class="c"># narrow, routed via coordinator</span></code></pre></div>
+<div class="blk quiz" data-a="A">
+<p class="q">Self-check — Which intervention does the LEAST to stop a synthesis agent's ad-hoc searches?</p>
+<button class="opt"><span class="key">A</span>A system-prompt directive forbidding searches</button>
+<button class="opt"><span class="key">B</span>Removing search tools from its definition</button>
+<button class="opt"><span class="key">C</span>Scoping toolsets per agent role</button>
+<button class="opt"><span class="key">D</span>A narrow scoped tool with complex cases routed via the coordinator</button>
+<p class="explain">B–D change what's possible; A only changes what's probable.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">G4</span><span class="t">Access failure ≠ valid empty result in return contracts</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>"The query ran and matched nothing" and "the source timed out before answering" are different <em>facts about the world</em>, and downstream logic needs both. A valid empty result means: accept it, the coverage is complete, a real gap exists. An access failure means: retry or degrade, and mark coverage incomplete. A return contract that collapses both into one <code>"no results"</code> status destroys the <strong>retry-vs-accept</strong> decision and the <strong>gap-vs-incomplete-coverage</strong> distinction — synthesis will confidently report "no evidence found" when the truth is "we never got to look." Encode the difference as distinct statuses with metadata (error type, sources attempted, partial coverage).</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Contract with separate statuses: <code>success</code> (possibly empty <code>results: []</code>) vs <code>access_error</code> (with <code>error_type</code>, <code>source</code>, <code>retryable</code>). Coordinator branches on status.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Empty list is simpler and the coordinator can retry anyway" — retry on what signal? Without the distinction, every empty looks final and every failure looks like absence of evidence.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>{"status": "success", "results": []}                       <span class="c"># real gap — accept</span>
+{"status": "access_error", "error_type": "timeout",
+ "source": "patents-db", "retryable": true}                <span class="c"># retry / flag coverage</span></code></pre></div>
+<div class="blk quiz" data-a="C">
+<p class="q">Self-check — Why must timeouts and zero-match results be distinct statuses?</p>
+<button class="opt"><span class="key">A</span>Timeouts must always crash the run</button>
+<button class="opt"><span class="key">B</span>Empty arrays are invalid JSON</button>
+<button class="opt"><span class="key">C</span>Collapsing them loses the retry-vs-accept and gap-vs-incomplete-coverage signals</button>
+<button class="opt"><span class="key">D</span>It reduces token usage</button>
+<p class="explain">Downstream decisions branch on exactly that distinction; merging the statuses corrupts both decisions.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">G5</span><span class="t">Provenance + calibrated confidence through synthesis</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Research output is only auditable if every claim stays attached to its evidence all the way to the final report. The mechanism: subagents emit <strong>structured claim–source mappings</strong> — claim, supporting excerpt, source identifier, date — and the synthesis stage <strong>preserves and merges</strong> these mappings rather than rewriting claims as free prose (which severs provenance). On top, the synthesis output carries <strong>coverage annotations</strong> distinguishing well-supported areas (multiple independent sources) from gap areas (single weak source, or none), so the reader gets calibrated confidence instead of uniform-sounding assertions. Losing structure at the synthesis boundary is the classic failure: everything upstream was traceable, and the final document is not.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Standardize a claim object across subagents; synthesis merges claim objects and annotates coverage (well-supported / thin / gap) per section.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Have synthesis cite sources from memory at the end" — reconstruction isn't preservation; provenance must flow through structurally, not be re-derived.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>{"claim": "EU market grew 14% in 2025",
+ "excerpt": "…grew 14.2% year-over-year…",
+ "source": "eurostat-2025-q4", "date": "2026-01-15",
+ "support": "well-supported (3 independent sources)"}</code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — How does the final report stay claim-by-claim auditable?</p>
+<button class="opt"><span class="key">A</span>A bibliography appended after synthesis</button>
+<button class="opt"><span class="key">B</span>Subagents emit claim-source mappings that synthesis preserves and merges, plus coverage annotations</button>
+<button class="opt"><span class="key">C</span>Lower temperature during synthesis</button>
+<button class="opt"><span class="key">D</span>Synthesis re-searches to verify each claim</button>
+<p class="explain">Provenance must be carried as structure through every stage; appended or re-derived citations break the chain.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">G6</span><span class="t">Conflicting credible figures: pass both, annotated — never average</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Two credible sources disagree: a large meta-analysis says X; a small-n preliminary study from months later says Y. Dropping one loses information; <strong>averaging</strong> manufactures a number no source ever reported; picking <strong>by recency</strong> alone lets a small preliminary result silently override established evidence. The correct contract passes <strong>both figures</strong>, each annotated with source, sample size / methodology, and date, and flagged established-vs-preliminary. With that metadata, synthesis can tell the true story — possibly a <em>temporal change</em> ("early data suggests a shift") versus a <em>contradiction</em> ("findings conflict; the larger study carries more weight") — instead of silently flattening it. Disagreement between sources is signal, not noise to be smoothed.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Emit both claims as parallel annotated objects; synthesis presents both with weight context and frames the relationship explicitly.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Use the newer figure" sounds like good hygiene — but recency is one attribute, not a verdict, especially against an n=12,000 meta-analysis. Averaging is the other tempting flattener.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>[{"value": "34%", "source": "meta-analysis", "n": 12400,
+  "date": "2025-08", "tier": "established"},
+ {"value": "21%", "source": "single-site pilot", "n": 48,
+  "date": "2026-01", "tier": "preliminary"}]</code></pre></div>
+<div class="blk quiz" data-a="D">
+<p class="q">Self-check — Meta-analysis vs newer small pilot disagree. The subagent should:</p>
+<button class="opt"><span class="key">A</span>Report only the newer figure</button>
+<button class="opt"><span class="key">B</span>Average them</button>
+<button class="opt"><span class="key">C</span>Drop the preliminary study</button>
+<button class="opt"><span class="key">D</span>Pass both, annotated with source, n/methodology, date, and established-vs-preliminary flags</button>
+<p class="explain">Only D lets synthesis distinguish temporal change from contradiction; A–C all destroy information.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">G7</span><span class="t">Crash recovery: export findings + progress markers, not transcripts</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Recovery design is defined by what it lets you do after the crash: <em>continue</em>, or merely <em>replay</em>. Periodically exporting each agent's <strong>completed findings plus progress markers</strong> — which subtopics are done, partial results, planned next steps — lets a restarted run pick up exactly where work stopped. Persisting only the launch <strong>parameters</strong> enables rerun-from-scratch (all intermediate work lost). Persisting <strong>full transcripts</strong> is heavyweight, slow to reload, and mostly noise — and replaying a transcript reproduces a conversation, not a work state. The checkpoint should be the same artifact a human handing off a task would write: what's done, what's in flight, what's next.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Per-agent periodic checkpoint: <code>{done: [...], partials: {...}, next: [...]}</code> in durable storage; on restart, seed agents from checkpoints.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Save everything (transcripts) to be safe" — completeness isn't the goal; <em>resumability</em> is, and transcripts don't encode work state cleanly. Parameters-only is the opposite failure: replay, not resume.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>{"agent": "regulatory", "done": ["EU", "UK"],
+ "partials": {"US": "federal done; 12 state registers pending"},
+ "next": ["US states", "APAC"], "ts": "2026-06-11T09:40Z"}</code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — A 3-hour multi-agent run must survive crashes. Persist what?</p>
+<button class="opt"><span class="key">A</span>Each agent's full transcript</button>
+<button class="opt"><span class="key">B</span>Completed findings + progress markers (done subtopics, partials, next steps)</button>
+<button class="opt"><span class="key">C</span>Only the initial launch parameters</button>
+<button class="opt"><span class="key">D</span>Nothing — rely on retries</button>
+<p class="explain">B is the only option that enables continuation; A bloats without work-state, C only replays from scratch.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">G8</span><span class="t">Dynamic subagent selection beats always-run-everything</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Running the full subagent pipeline on every query is justified under exactly one condition: <strong>every query genuinely needs every subagent</strong>. Otherwise it burns cost and latency on irrelevant work and — worse — injects off-topic findings that dilute synthesis. The standard architecture has the coordinator <strong>analyze each query first</strong> and launch only the subagents whose specialty the query touches: a pricing question spins up pricing and competitor agents, not the regulatory one. This is the agent-level form of "load only what each step needs," and it also scales better as you add specialists — a fixed pipeline grows linearly in cost with each new agent whether or not queries need it.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Coordinator step 0: classify the query → select the minimal subagent set → launch in parallel → synthesize.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Run everything for completeness/consistency" sounds rigorous; it's only correct when the need is truly universal — exam stems usually state heterogeneous query types precisely to rule it out.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>plan = coordinator.analyze(query)
+<span class="c"># "compare vendor pricing tiers" → ["pricing", "competitors"]</span>
+launch(plan.selected)        <span class="c"># NOT all six specialists</span></code></pre></div>
+<div class="blk quiz" data-a="A">
+<p class="q">Self-check — When is always-run-the-full-pipeline actually justified?</p>
+<button class="opt"><span class="key">A</span>Only if every query needs every subagent</button>
+<button class="opt"><span class="key">B</span>Whenever latency doesn't matter</button>
+<button class="opt"><span class="key">C</span>Whenever subagents are cheap</button>
+<button class="opt"><span class="key">D</span>Always — consistency beats efficiency</button>
+<p class="explain">Universal need is the sole justification; otherwise the coordinator selects per query.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">G9</span><span class="t">Error-propagation ranking: W > Y > Z > X</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Rank error strategies by how much correct work survives and how visible the failure stays. <strong>Best (W):</strong> local retry/recovery first, propagating only if unresolved, returning partial results with the failure flagged — maximum salvage, full visibility. <strong>Next (Y):</strong> propagate everything visibly — noisy and salvages nothing locally, but nothing is hidden. <strong>Worse (Z):</strong> terminate the whole run on any error — visible but throws away all completed work. <strong>Worst (X):</strong> silently return empty-as-success — it <em>corrupts coverage undetectably</em>: synthesis treats absence-by-failure as genuine absence of evidence, and no one can ever tell. The governing principle: silent corruption is worse than loud failure, and loud failure is worse than graceful recovery.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Local retry → on persistent failure, propagate a flagged partial result. Never map failure onto the success shape.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> Ranking Z above Y ("at least terminating is decisive") — visibility plus <em>preserved partial work</em> beats clean-slate destruction. And X is always last: undetectable corruption is the cardinal sin.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>W: retry ×2 → {"status":"partial","done":7,"failed":["src-3"]}   <span class="c"># best</span>
+Y: raise every error to coordinator                              
+Z: abort entire run on first error                               
+X: return {"results": []} on failure                             <span class="c"># worst — silent</span></code></pre></div>
+<div class="blk quiz" data-a="C">
+<p class="q">Self-check — Why is silently-empty-as-success the WORST strategy?</p>
+<button class="opt"><span class="key">A</span>It wastes the most tokens</button>
+<button class="opt"><span class="key">B</span>It causes the most retries</button>
+<button class="opt"><span class="key">C</span>It corrupts coverage undetectably — failure becomes indistinguishable from a genuine empty result</button>
+<button class="opt"><span class="key">D</span>It terminates sibling agents</button>
+<p class="explain">Every other failure is at least observable; X poisons conclusions with no trace.</p>
+</div>
+</div></div></div>
+</article>
+</section>
+
+<!-- ================= THEME H ================= -->
+<section class="theme" id="theme-h">
+<div class="theme-head"><span class="tk">THEME H</span><h2>Built-in tools &amp; MCP</h2></div>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">H1</span><span class="t">Glob vs Grep vs Edit vs Read+Write — pick by job shape</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Each built-in tool owns one job shape. <strong>Glob</strong> finds files by <em>filename pattern</em> (<code>**/*.test.ts</code>). <strong>Grep</strong> finds files by <em>content</em> — and it is strictly <strong>read-only</strong>; "Grep might modify files" is a false rationale planted in distractors. <strong>Edit</strong> changes a single spot that can be <em>uniquely anchored</em> by surrounding text. When the string you must change has a <strong>non-unique anchor</strong> but only one file should change, <code>Edit</code> with <code>replace_all</code> would hit every occurrence — so use <strong>Read + Write</strong> on that one file: read it, transform precisely, write it back. Finally, route search through Glob/Grep, not <code>Bash find/grep</code> — Bash is a high-risk arbitrary-command surface where the purpose-built read-only tools suffice.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Filename pattern → Glob. Content search → Grep. Unique anchor edit → Edit. Non-unique anchor, one specific file → Read+Write. Avoid Bash for search.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Edit with replace_all in one file" — replace_all replaces <em>all</em> matches in scope, exactly what a non-unique anchor forbids. <span class="trap">DISTRACTOR</span> Any option whose justification is "Grep could modify files."</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>find every *.config.ts                  → Glob "**/*.config.ts"
+which files call legacyAuth()           → Grep "legacyAuth\("
+fix the one uniquely-anchored typo      → Edit
+change 1 of 9 identical "timeout: 30"
+  lines in server.ts only               → Read server.ts → Write</code></pre></div>
+<div class="blk quiz" data-a="D">
+<p class="q">Self-check — A string appears 9 times in one file; change only the 4th, anchor text isn't unique. Tool?</p>
+<button class="opt"><span class="key">A</span>Edit with replace_all</button>
+<button class="opt"><span class="key">B</span>Grep with a write flag</button>
+<button class="opt"><span class="key">C</span>Bash sed</button>
+<button class="opt"><span class="key">D</span>Read the file, modify precisely, Write it back</button>
+<p class="explain">replace_all hits all 9; Grep can't write at all; Bash is the high-risk surface; Read+Write gives exact control.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">H2</span><span class="t">Tracing re-exported aliases: enumerate, Grep each, union</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Barrel files (<code>index.ts</code> re-exports) let one helper travel under multiple names: <code>export { parseAmt as parseAmount }</code> here, <code>as parseMoney</code> there. Following imports from a <strong>single seed</strong> walks one alias chain and structurally misses files that imported a <em>different</em> alias — those import paths never intersect your traversal. The complete method: first enumerate <strong>all export names</strong> the helper travels under (Grep the barrel files for its re-exports), then <strong>Grep for each alias</strong> across the codebase, then take the <strong>union</strong> of all result sets. Coverage problems demand enumerate-then-union; chain-following is a depth strategy applied to a breadth problem.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Grep barrels → collect alias set {parseAmt, parseAmount, parseMoney} → Grep each → union the file lists → that's every consumer.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Follow imports from the definition" feels systematic but only covers one alias lineage — independently aliased imports are invisible to it.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>Grep "parseAmt"     → finds re-exports: parseAmount, parseMoney
+Grep "parseAmount"  → 14 files ┐
+Grep "parseMoney"   →  6 files ├─ union → 19 unique consumers
+Grep "parseAmt"     →  3 files ┘</code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — A helper is re-exported under 3 aliases via barrels. Find all usages how?</p>
+<button class="opt"><span class="key">A</span>Follow imports from the original definition file</button>
+<button class="opt"><span class="key">B</span>Enumerate all export names, Grep each, union the results</button>
+<button class="opt"><span class="key">C</span>Grep only the original name</button>
+<button class="opt"><span class="key">D</span>Glob for files named like the helper</button>
+<p class="explain">Only enumerate-and-union covers independently aliased import paths; A and C each miss whole alias lineages.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">H3</span><span class="t">Large codebases: Grep entry points, Read to follow — incrementally</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>You cannot and should not load a 2,000-file codebase into context. The efficient exploration loop is incremental: <strong>Grep</strong> for entry points or the symbols relevant to the task (routes, main, the failing function), then <strong>Read</strong> only the matched files, follow their imports with further targeted Reads, and repeat — loading <em>only what each step needs</em>. This keeps the window populated with relevant code, preserving attention quality (D4's lesson applies: present ≠ attended). Note again for the distractors: Grep is <strong>read-only</strong>; any option rejected or justified on the grounds that "Grep modifies files" is using a false rationale.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Grep (locate) → Read (load minimal set) → follow imports with targeted Reads → iterate. Never bulk-load directories.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">TRAP 1 · bigger budget</span> "Use a bigger context and read more upfront" — relevance, not capacity, is the constraint; bulk content dilutes attention even when it fits.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>Grep "app.listen|createServer"  → src/server.ts
+Read src/server.ts              → imports ./routes, ./middleware/auth
+Read src/routes/index.ts        → only the route relevant to the bug
+…each step loads just its need</code></pre></div>
+<div class="blk quiz" data-a="C">
+<p class="q">Self-check — Best first move to understand request flow in a 2,000-file repo?</p>
+<button class="opt"><span class="key">A</span>Read every file in src/ alphabetically</button>
+<button class="opt"><span class="key">B</span>Bash find piped through cat</button>
+<button class="opt"><span class="key">C</span>Grep for entry points, then Read matched files and follow imports incrementally</button>
+<button class="opt"><span class="key">D</span>Avoid Grep since it may modify files</button>
+<p class="explain">C loads only what each step needs; D's rationale is false (Grep is read-only); A/B flood context.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">H4</span><span class="t">MCP resources are readable catalogs, not tools</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>MCP servers expose two distinct primitives. <strong>Tools</strong> are invokable actions the model calls turn-by-turn (and that <code>tool_choice</code> governs). <strong>Resources</strong> are <em>readable content</em> — documents, schemas, catalogs — addressed by URI, which the agent (or host application) <em>consults</em> as reference material. A database schema is the canonical resource: the agent reads it to write correct queries; it doesn't "invoke" it, and <code>tool_choice</code> has nothing to do with it. Exam stems test the category boundary: anything framed as "stable reference content the agent should consult" is a resource; anything framed as "an action with parameters and effects" is a tool.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Expose the DB schema as an MCP <em>resource</em> (e.g., <code>schema://warehouse</code>); expose <code>run_query</code> as the <em>tool</em>. The agent reads the former to drive the latter.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Make the schema a tool the model calls each turn via tool_choice" — wrong primitive: it forces invocation ceremony onto static content and misdescribes how resources are consumed.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>resources: [{"uri": "schema://warehouse",
+             "name": "Warehouse DB schema", "mimeType": "text/plain"}]
+tools:     [{"name": "run_query", "input_schema": {...}}]</code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — In MCP, a database schema the agent consults is best exposed as:</p>
+<button class="opt"><span class="key">A</span>A tool invoked with tool_choice each turn</button>
+<button class="opt"><span class="key">B</span>A resource — readable content the agent consults</button>
+<button class="opt"><span class="key">C</span>A system-prompt paste, always</button>
+<button class="opt"><span class="key">D</span>An environment variable</button>
+<p class="explain">Resources are readable catalogs; tools are invokable actions. Schemas are the textbook resource.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">H5</span><span class="t">Community servers for standard integrations; custom for bespoke</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>MCP sourcing follows build-vs-buy logic. For <strong>standard integrations</strong> — GitHub, Slack, Postgres — well-maintained community servers exist, get upstream fixes and security patches, and track API changes; maintaining a parallel custom server for the same surface is pure duplicated cost. <strong>Custom servers</strong> are reserved for bespoke, team-specific systems — an internal entitlements service — where no community option can exist. The sneaky distractor is <strong>sunk cost</strong>: "we already built and maintain our custom GitHub server, so keep it." Past investment is not a reason to keep paying maintenance on a redundant component; migrate to the community server and retire it.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Adopt the community server for GitHub-class integrations; build/keep custom servers only for internal systems; retire redundant custom ones regardless of effort already spent.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> The sunk-cost option is dressed as prudence ("we know our code best"). Evaluate forward-looking cost only.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>GitHub PRs/issues       → community github-mcp     <span class="c"># standard</span>
+Internal entitlements   → custom entitlements-mcp  <span class="c"># bespoke, no alternative</span>
+Old custom GitHub server → retire (sunk cost ≠ reason)</code></pre></div>
+<div class="blk quiz" data-a="A">
+<p class="q">Self-check — Team maintains a custom GitHub MCP server; a mature community one exists. Best call?</p>
+<button class="opt"><span class="key">A</span>Migrate to the community server; retire the custom one</button>
+<button class="opt"><span class="key">B</span>Keep the custom server — it's already built</button>
+<button class="opt"><span class="key">C</span>Run both for redundancy</button>
+<button class="opt"><span class="key">D</span>Rewrite the internal entitlements server as community code too</button>
+<p class="explain">Sunk maintenance cost never justifies redundancy; custom belongs only where nothing shared can exist.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">H6</span><span class="t">Secret committed in .mcp.json: env-var reference AND rotate</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>A committed secret creates <strong>two independent problems</strong>, and a complete answer fixes both. Problem 1, recurrence: the literal token sits in a tracked file — replace it with an environment-variable reference like <code>${API_TOKEN}</code> so the value never enters the repo again. Problem 2, exposure: the token already exists in <strong>git history</strong>, every clone, every CI cache — it must be treated as <strong>compromised and rotated</strong> immediately. Adding the file to <code>.gitignore</code> does <em>not</em> remove what's already in history (and the file may need to stay tracked anyway); it addresses neither problem. Any option missing rotation is incomplete; any option that's only .gitignore is wrong twice.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Edit <code>.mcp.json</code> to <code>"${API_TOKEN}"</code>, set the env var in each environment, and rotate the leaked token at the provider now.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> ".gitignore the file" — the leak already happened; history is forever (absent a rewrite, which still doesn't recall remote clones). Rotation is non-optional.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>{"mcpServers": {"crm": {
+  "command": "crm-mcp",
+  "env": {"CRM_API_TOKEN": "${CRM_API_TOKEN}"}}}}
+<span class="c"># + rotate the old token at the provider — it's compromised</span></code></pre></div>
+<div class="blk quiz" data-a="C">
+<p class="q">Self-check — An API token was committed in .mcp.json last week. Complete fix?</p>
+<button class="opt"><span class="key">A</span>Add .mcp.json to .gitignore</button>
+<button class="opt"><span class="key">B</span>Replace the literal with ${API_TOKEN} only</button>
+<button class="opt"><span class="key">C</span>Replace with an env-var reference AND rotate the token as compromised</button>
+<button class="opt"><span class="key">D</span>Delete the file in a new commit</button>
+<p class="explain">History retains the secret under A, B and D; only C stops recurrence and neutralizes the existing exposure.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">H7</span><span class="t">18 tools degrade selection → split across role-scoped agents</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Tool-selection accuracy degrades as the menu grows: with 18 overlapping tools, descriptions blur together and per-call mis-selection compounds across a session. This is a <strong>decision-complexity</strong> problem, so the fix reduces the decision: split capabilities across <strong>role-scoped agents</strong>, each holding only the few tools its role needs (billing agent: 4 billing tools), with a coordinator routing requests. A bigger model still faces the same 18-way ambiguity (capability ≠ smaller decision). A router that <em>force-selects</em> the tool just relocates the same hard 18-way decision into the router. Shrinking the per-decision option set is the only move that attacks the cause.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Partition 18 tools into 4–5 role agents of 3–5 tools each; coordinator routes by intent; each agent now makes easy small-menu choices.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">TRAP 1 · bigger budget</span> "Upgrade the model" doesn't shrink the menu. <span class="trap">DISTRACTOR</span> "Add a forcing router" — the 18-way ambiguity just moved upstream, unsolved.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>coordinator ──routes──▶ billing-agent   [4 tools]
+                        shipping-agent  [4 tools]
+                        account-agent   [5 tools]
+                        catalog-agent   [5 tools]</code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — Agent with 18 tools keeps picking the wrong one. Root-cause fix?</p>
+<button class="opt"><span class="key">A</span>Switch to the most capable model</button>
+<button class="opt"><span class="key">B</span>Split capabilities across role-scoped agents, each with only its few tools</button>
+<button class="opt"><span class="key">C</span>A router that force-selects the tool</button>
+<button class="opt"><span class="key">D</span>Longer tool descriptions for all 18</button>
+<p class="explain">Only B reduces decision complexity; A is the budget trap, C relocates the same decision, D adds context without shrinking the choice.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">H8</span><span class="t">Good tool ignored? Suspect system-prompt keyword phrasing</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>When a well-described custom tool is consistently ignored in favor of a built-in, and the description has already been verified as clear, look <em>upstream</em>: the <strong>system prompt's phrasing</strong> is most likely creating a keyword association that overrides the description at selection time. If the prompt says "search the codebase for relevant files," the token "search" pulls toward the built-in search tool even when <code>query_index</code> is objectively better. Tool selection is driven by the whole context, and the system prompt is the highest-leverage text in it. Diagnosis: review the system prompt for vocabulary aligning with the built-in, and re-phrase to name or describe the custom tool's action ("use the code index to look up…").</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Audit the system prompt for biasing keywords; align its verbs/nouns with the custom tool; if appropriate, mention the tool by name for its use cases.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> Re-polishing the (already good) description, or assuming a model deficiency — the stem says the description checks out, which is the cue to look at the system prompt.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>BAD : "Search the repository to answer code questions."
+        → model reaches for built-in search
+GOOD: "Answer code questions by querying the code index
+       (query_index); use built-in search only if the index misses."</code></pre></div>
+<div class="blk quiz" data-a="C">
+<p class="q">Self-check — Description is verified clear, yet the custom tool is always skipped for a built-in. First check?</p>
+<button class="opt"><span class="key">A</span>Raise temperature</button>
+<button class="opt"><span class="key">B</span>Rewrite the already-clear description again</button>
+<button class="opt"><span class="key">C</span>The system prompt — keyword phrasing likely associates the task with the built-in</button>
+<button class="opt"><span class="key">D</span>The tool's JSON schema types</button>
+<p class="explain">With the description ruled out, prompt-induced keyword association is the most likely selector bias.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">H9</span><span class="t">Calibrate constrained tools: admit legitimate inputs, keep rejecting unsafe</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>You replaced a permissive <code>fetch_url</code> with a constrained one, and it's now rejecting <em>legitimate</em> inputs — e.g., stripping query strings that signed internal URLs require (signatures live in <code>?sig=…</code>, so stripping breaks them). The fix is <strong>calibration, not capitulation</strong>: refine the validation to preserve query strings for allow-listed internal hosts while still rejecting the genuinely unsafe categories (arbitrary external hosts, credential-bearing URLs to unknown domains). Two tempting failures: reverting to the permissive tool reopens the entire hole the constraint existed to close; adding a prompt-level fallback ("if the safe tool fails, use the old one") creates a model-invocable bypass — the hole, with extra steps.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Allow-list internal domains with query strings intact (validate the signature parameter's presence/shape if needed); keep strict rules for everything else.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Restore the old tool" / "let the prompt fall back" — both reopen the vulnerability. Over-blocking is fixed by sharpening the boundary, never by removing it.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>def safe_fetch(url):
+    u = parse(url)
+    if u.host in INTERNAL_ALLOWLIST:
+        return fetch(url)            <span class="c"># query string PRESERVED — signed URLs work</span>
+    if u.host in PUBLIC_ALLOWLIST and not has_credentials(u):
+        return fetch(strip_tracking(url))
+    return err("domain not permitted")</code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — The hardened fetch tool breaks signed internal URLs by stripping query strings. Fix?</p>
+<button class="opt"><span class="key">A</span>Revert to the permissive fetch tool</button>
+<button class="opt"><span class="key">B</span>Calibrate validation: preserve query strings for allow-listed internal hosts, keep rejecting unsafe fetches</button>
+<button class="opt"><span class="key">C</span>Prompt: "fall back to the old tool when the safe one errors"</button>
+<button class="opt"><span class="key">D</span>Strip query strings but retry twice</button>
+<p class="explain">Sharpen the boundary (B). A and C reopen the hole; D retries the same broken transform.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">H10</span><span class="t">Verbose investigations → subagent returning a concise summary</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>A bounded but verbose sub-task — read 40 log files to find one root cause — would flood the main agent's context with intermediate noise and degrade its attention on the high-level task. The architectural answer: <strong>delegate to a subagent</strong>, let the verbosity live and die in the subagent's isolated context, and have it <strong>return only a concise structured summary</strong>. Compare the alternatives: <code>/compact</code> is <em>reactive</em> — it compresses after pollution has already happened and may lose specifics; a bigger context budget merely <em>delays</em> exhaustion while still diluting attention (D4 again). Isolation-by-delegation is the only option that prevents the pollution rather than coping with it.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Coordinator: "Investigate the deploy failure across logs/; return root cause, evidence (≤5 lines), and fix suggestion." The 40 files never touch the main context.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">TRAP 1 · bigger budget</span> Larger window = slower drowning, same dilution. <span class="trap">DISTRACTOR</span> /compact = mop after the flood, with lossy compression risk.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>Task(subagent: log-investigator)
+  in : "find root cause of deploy #4412 failure in logs/"
+  out: {"root_cause": "OOM in migration step",
+        "evidence": "worker-3.log:2210-2214", "fix": "batch migration"}</code></pre></div>
+<div class="blk quiz" data-a="A">
+<p class="q">Self-check — Keep the main agent's context clean during a verbose 40-file investigation. Best?</p>
+<button class="opt"><span class="key">A</span>Delegate to a subagent that returns a concise summary</button>
+<button class="opt"><span class="key">B</span>Run /compact afterward</button>
+<button class="opt"><span class="key">C</span>Use the largest context window</button>
+<button class="opt"><span class="key">D</span>Read the files in smaller chunks in the main context</button>
+<p class="explain">Only delegation prevents pollution; B is reactive, C delays exhaustion, D still accumulates everything.</p>
+</div>
+</div></div></div>
+</article>
+</section>
+
+<!-- ================= THEME I ================= -->
+<section class="theme" id="theme-i">
+<div class="theme-head"><span class="tk">THEME I</span><h2>Message Batches API</h2></div>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">I1</span><span class="t">Batch constraints: 10k/32MB, 29-day results, 24h ceiling, no webhook</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Four hard facts define batch operations. (1) <strong>Capacity:</strong> a batch holds up to <strong>10,000 requests or 32MB</strong>, whichever limit hits first — bigger jobs are chunked into multiple batches. (2) <strong>Retention:</strong> results are retained <strong>29 days</strong>; pipelines that need them longer must copy results to durable storage promptly. (3) <strong>Expiry:</strong> processing has a <strong>24-hour ceiling</strong>; a request that expires unprocessed is <strong>unbilled</strong> but yields no result — it must be <strong>resubmitted</strong>, so your pipeline needs expiry handling, not just error handling. (4) <strong>Notification:</strong> there is <strong>no completion webhook</strong> — you <strong>poll</strong> the batch's processing status. Each fact is a favorite exam distractor in negated form ("a webhook fires," "expired requests are billed," "results persist indefinitely").</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Chunk to ≤10k/32MB; poll status on a backoff schedule; on end, copy results out within the 29-day window; detect expired requests and resubmit them.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">SHAPE 1 · FALSE stems</span> These appear as "all true EXCEPT" questions. Memorize the four numbers/absences as a unit: 10k / 32MB / 29d / 24h / poll-not-push / expired-unbilled-but-resubmit.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>POST /v1/messages/batches            <span class="c"># ≤10,000 reqs or 32MB</span>
+GET  /v1/messages/batches/{id}       <span class="c"># POLL: in_progress → ended</span>
+GET  …/results                       <span class="c"># stream; copy out — 29-day retention</span>
+<span class="c"># request expired at 24h → not billed, no result → resubmit</span></code></pre></div>
+<div class="blk quiz" data-a="D">
+<p class="q">Self-check — Which statement about the Batches API is FALSE?</p>
+<button class="opt"><span class="key">A</span>A batch is capped at 10,000 requests or 32MB</button>
+<button class="opt"><span class="key">B</span>Results are retained for 29 days</button>
+<button class="opt"><span class="key">C</span>A request expired at the 24h ceiling is unbilled but must be resubmitted</button>
+<button class="opt"><span class="key">D</span>A completion webhook notifies you when the batch ends</button>
+<p class="explain">No webhook exists — completion is discovered by polling. A–C are the true constraints.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">I2</span><span class="t">Meeting an SLA: windowed submission, custom_id, resubmit failures</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>To run a recurring large workload against a deadline (e.g., results by 9am daily), design around the 24-hour processing window rather than hoping. <strong>Submit in periodic windows</strong> sized so that even worst-case (full 24h) processing lands inside the SLA — e.g., submit yesterday's accumulated documents at 8am for a next-morning deadline. <strong>Correlate by <code>custom_id</code></strong>: results return in arbitrary order, so each request carries your stable identifier for joining back to source records. <strong>Resubmit only the failures/expired</strong> — never the whole batch — and <strong>chunk oversized requests</strong> that errored on size. Together: predictable landing time, exact correlation, minimal redo cost.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Window submissions against the 24h ceiling; key every request with custom_id; sweep results for errored/expired items and resubmit just those, splitting any oversize offenders.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Resubmit the entire batch if anything failed" — pays full cost again and risks blowing the window. "Match results by position/order" — order is not guaranteed; only custom_id is safe.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>{"custom_id": "doc-2026-06-11-00042",
+ "params": {"model": "claude-sonnet-4-5", "max_tokens": 1024,
+            "messages": [...]}}
+<span class="c"># nightly: submit 08:00 → poll → join on custom_id → resubmit failures only</span></code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — 80k docs/day, results due 9am. Strategy?</p>
+<button class="opt"><span class="key">A</span>One giant batch whenever docs arrive; match results by order</button>
+<button class="opt"><span class="key">B</span>Windowed submissions sized against the 24h ceiling, custom_id correlation, resubmit only failures (chunk oversized)</button>
+<button class="opt"><span class="key">C</span>Synchronous API calls for all 80k</button>
+<button class="opt"><span class="key">D</span>Wait for the completion webhook, then download</button>
+<p class="explain">B is the full pattern. A breaks correlation and the 10k cap; C forfeits batch economics; D's webhook doesn't exist.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">I3</span><span class="t">Batches can't do multi-turn tool calling — that work stays synchronous</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Each batch request is a <strong>single, self-contained generation</strong>: the model produces one response and the request ends. Multi-turn tool calling requires a loop — model emits <code>tool_use</code>, <em>your code executes the tool</em>, you send the result back, the model continues. The Batches API has no mechanism to execute your tools mid-request and feed results back in; nobody is on the other end of the loop. So a workload that needs mid-analysis tool calls (e.g., a code review that must query a ticket system while reasoning) is <strong>category-incompatible</strong> with batching and must stay <strong>synchronous</strong>. (Requests <em>can</em> include tools and may return a tool_use as the final output — but the interactive loop cannot continue inside the batch.)</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Split the pipeline: batchable single-shot stages (classification, summarization) go to Batches; the tool-looping stage runs synchronously. Or pre-fetch tool data and inline it so the batch request needs no live calls.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">TRAP 1 · category</span> No retry count, batch size, or model upgrade adds an execution loop that the API shape doesn't have. Incompatibility questions are settled by mechanism, not by knobs.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>batchable : "summarize this PR diff"                  <span class="c"># one shot</span>
+NOT       : "review this PR; query Jira for the
+             linked ticket while analyzing"            <span class="c"># needs mid-run loop → sync</span></code></pre></div>
+<div class="blk quiz" data-a="C">
+<p class="q">Self-check — Why can't a review needing mid-analysis Jira lookups run via Batches?</p>
+<button class="opt"><span class="key">A</span>Batches forbid tool definitions in requests</button>
+<button class="opt"><span class="key">B</span>Jira responses exceed 32MB</button>
+<button class="opt"><span class="key">C</span>Batches can't execute tools mid-request and feed results back — no multi-turn loop exists</button>
+<button class="opt"><span class="key">D</span>Tool calls are billed double in batches</button>
+<p class="explain">The interactive execute-and-continue loop is structurally absent; such workloads stay synchronous.</p>
+</div>
+</div></div></div>
+</article>
+</section>
+
+<!-- ================= THEME J ================= -->
+<section class="theme" id="theme-j">
+<div class="theme-head"><span class="tk">THEME J</span><h2>CI / automated review design</h2></div>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">J1</span><span class="t">Fixed known aspects → prompt chaining, not consensus, not dynamic</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Match the orchestration pattern to the task's structure. Three <strong>fixed, known</strong> review aspects — security, performance, correctness — are a static checklist, and the natural fit is <strong>prompt chaining</strong>: fixed sequential passes, one focused prompt per aspect, each pass getting full attention on its concern. <strong>Consensus-of-three independent passes</strong> is the wrong instrument here: consensus keeps what reviewers <em>agree on</em>, so a real security flaw caught by only one pass is voted away — it <em>suppresses</em> exactly the rare, single-detector findings reviews exist to surface. <strong>Dynamic decomposition</strong> (agent decides sub-tasks at runtime) suits open-ended investigation where aspects aren't known in advance; for a fixed list it adds nondeterminism without benefit.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Chain: pass 1 security → pass 2 performance → pass 3 correctness; merge the three structured finding lists (union, never intersection).</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Three independent reviews + majority vote = more reliable" — voting is for suppressing <em>noise</em> on the same question; findings are unions of different questions. Mis-applied reliability intuition.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>findings = []
+for aspect in ["security", "performance", "correctness"]:
+    findings += review(diff, prompt=PROMPTS[aspect])   <span class="c"># UNION of passes</span></code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — Why is consensus-of-three wrong for the three fixed review aspects?</p>
+<button class="opt"><span class="key">A</span>It costs three times more</button>
+<button class="opt"><span class="key">B</span>It suppresses real findings caught by only one pass — agreement filtering deletes rare detections</button>
+<button class="opt"><span class="key">C</span>Three passes can't run in parallel</button>
+<button class="opt"><span class="key">D</span>Consensus requires five voters minimum</button>
+<p class="explain">Reviews want the union of findings; consensus computes the intersection. Chaining one focused pass per aspect fits the fixed list.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">J2</span><span class="t">Miscalibrated confidence: calibrate on labels + keep a human gate</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Defects shipped under confident "clean" verdicts mean the model's self-reported confidence is <strong>miscalibrated</strong> — its 0.9 doesn't correspond to 90% empirical correctness. Raw miscalibrated numbers can't be fixed by moving the threshold up or inverting it: you'd be re-slicing a distorted scale, with no idea what any cutoff means. The repair is empirical: score the reviewer against a <strong>labeled validation set</strong> (changes with known defect outcomes), learn the mapping from self-reported to <em>actual</em> reliability, and threshold on the calibrated value. And because calibration is imperfect and drifts, <strong>keep a human gate on consequential merges</strong>. Discarding the signal entirely wastes real (if warped) information.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Build a labeled set → measure empirical precision per confidence band → threshold on calibrated confidence → human approval remains mandatory for high-impact merges.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Just require 0.95 instead of 0.8" — an uncalibrated 0.95 is as meaningless as an uncalibrated 0.8. The flaw is the scale, not the cutoff.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>band 0.9–1.0 → empirically 71% clean   <span class="c"># calibration table from labeled set</span>
+band 0.7–0.9 → empirically 64% clean
+policy: auto-pass only calibrated ≥0.95 AND non-critical path;
+        everything consequential → human gate</code></pre></div>
+<div class="blk quiz" data-a="C">
+<p class="q">Self-check — Confident "clean" verdicts keep shipping defects. Best response?</p>
+<button class="opt"><span class="key">A</span>Raise the confidence threshold to 0.99</button>
+<button class="opt"><span class="key">B</span>Invert the signal — treat high confidence as risk</button>
+<button class="opt"><span class="key">C</span>Calibrate against a labeled validation set before thresholding, and keep a human gate on consequential merges</button>
+<button class="opt"><span class="key">D</span>Drop confidence from the pipeline entirely</button>
+<p class="explain">Only calibration gives the numbers meaning; A/B re-slice a distorted scale, D discards usable signal.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">J3</span><span class="t">Analyzing a noisy reviewer: add a structured detected_pattern field</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>One review category fires too often and devs dismiss it; you need to learn <em>why</em> it misfires. That requires the dismissal data to be <strong>analyzable</strong>, which requires structure at the point of detection: add a <code>detected_pattern</code> field to every structured finding, recording the <strong>specific code construct that triggered it</strong>. Now dismissals group cleanly — "84% of dismissed findings triggered on builder-pattern chaining" — and the fix designs itself. The alternatives fail the analyzability test: free-text reasons don't aggregate; demoting severity hides the noise instead of explaining it; running three times and keeping repeats filters <em>stochastic</em> noise but a systematic false-positive pattern reproduces consistently and sails through.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Extend the finding schema with <code>detected_pattern</code> (and keep dismissal status); aggregate dismissals by pattern; refine or special-case the top offending patterns.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Triple-run and keep only repeated findings" sounds statistical — but systematic misfires are deterministic; repetition-filtering measures variance, not validity.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>{"category": "resource-leak", "file": "db.ts", "line": 88,
+ "detected_pattern": "connection created in try without finally",
+ "dismissed": true}
+<span class="c"># GROUP BY detected_pattern WHERE dismissed → top misfiring constructs</span></code></pre></div>
+<div class="blk quiz" data-a="A">
+<p class="q">Self-check — To analyze WHY a category misfires, the pipeline should:</p>
+<button class="opt"><span class="key">A</span>Record a detected_pattern field (triggering construct) on each structured finding</button>
+<button class="opt"><span class="key">B</span>Collect free-text dismissal comments</button>
+<button class="opt"><span class="key">C</span>Demote the category to "info" severity</button>
+<button class="opt"><span class="key">D</span>Run the review three times and keep only repeated findings</button>
+<p class="explain">Only structured trigger data aggregates into a diagnosis; B doesn't aggregate, C hides, D misses systematic (consistent) false positives.</p>
+</div>
+</div></div></div>
+</article>
+</section>
+
+<!-- ================= THEME K ================= -->
+<section class="theme" id="theme-k">
+<div class="theme-head"><span class="tk">THEME K</span><h2>Structured data extraction</h2></div>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">K1</span><span class="t">Strict/structured outputs guarantee shape, never semantics</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Strict tool use and native Structured Outputs constrain <em>generation</em> so the result always parses: correct property names, correct <strong>types</strong>, required fields present, no extras. That is the entire guarantee — <strong>shape and type</strong>. They cannot guarantee the <em>content</em> is right: a line-items array can sum to 4,210 while <code>total</code> says 4,580 (failed arithmetic reconciliation), or the shipping fee can land in the tax field (wrong field placement) — both are perfectly schema-valid. Semantic correctness needs a second layer: <strong>semantic validation</strong>. A strong pattern is making the model do the reconciliation explicitly — extract <code>calculated_total</code> (its own sum of line items) alongside <code>stated_total</code> (what the document says) plus a <code>conflict_detected</code> flag, then verify the arithmetic in code.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Schema enforcement for shape + post-extraction semantic checks in code (cross-field arithmetic, referential sanity) + reconciliation fields in the schema itself.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">TRAP 1 · shape-vs-semantics</span> "It's schema-validated, so the data is correct" conflates two categories. Schema validity says it <em>parses</em>; only validation says it's <em>true</em>.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>{"line_items": [...],
+ "stated_total": 4580.00,
+ "calculated_total": 4210.00,     <span class="c"># model's own sum</span>
+ "conflict_detected": true}       <span class="c"># + code re-verifies the sum</span></code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — Strict tool use is on, yet invoice totals don't match their line items. Why?</p>
+<button class="opt"><span class="key">A</span>Strict mode is misconfigured</button>
+<button class="opt"><span class="key">B</span>Schema enforcement guarantees shape and type only — semantic correctness needs separate validation</button>
+<button class="opt"><span class="key">C</span>The JSON grammar corrupted the numbers</button>
+<button class="opt"><span class="key">D</span>max_tokens truncated the totals</button>
+<p class="explain">A wrong-but-well-typed number is schema-valid. Add calculated_total / stated_total / conflict_detected plus code-side checks.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">K2</span><span class="t">minimum/maximum bounds aren't grammar-enforced — validate after</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>The structured-outputs grammar enforces structural JSON-Schema features — types, required, enums, property names — but <strong>numeric <code>minimum</code>/<code>maximum</code> bounds are not enforced by the constrained-decoding grammar</strong>. A field declared <code>0 ≤ x ≤ 100</code> can still come back as 250: well-typed, out of range. So range integrity is your job: <strong>post-response validation</strong> in code rejects or flags out-of-bounds values, and you should <em>also</em> document the bound in the field's <code>description</code> — that nudges the model toward compliance (probabilistically) while the code check provides the guarantee. Notice this is Theme A in miniature: description = prompt-level advice; validator = deterministic enforcement.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Keep the bound in the schema description for guidance + enforce it in a post-response validator that routes violations to retry or review.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "The schema says max 100, so values are capped" — assumes the grammar enforces every keyword; it enforces structure, not numeric ranges.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>"discount_pct": {"type": "number",
+  "description": "Percentage 0–100. Never exceed 100."}
+<span class="c"># code:</span>
+if not (0 &lt;= out["discount_pct"] &lt;= 100): flag_for_review(out)</code></pre></div>
+<div class="blk quiz" data-a="C">
+<p class="q">Self-check — discount_pct has maximum: 100 in the schema, yet 250 appears. Why, and what's the fix?</p>
+<button class="opt"><span class="key">A</span>The schema was ignored entirely — re-enable strict mode</button>
+<button class="opt"><span class="key">B</span>Numbers can't be constrained at all in JSON Schema</button>
+<button class="opt"><span class="key">C</span>Numeric bounds aren't grammar-enforced; add post-response validation (and document the bound in the description)</button>
+<button class="opt"><span class="key">D</span>Lower the temperature to 0</button>
+<p class="explain">Types are enforced, ranges are not; the deterministic check lives in your code.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">K3</span><span class="t">Unknown document types: "any" + strict (B3 applied)</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>The extraction-pipeline framing of B3. Inbound documents of unknown type must <em>always</em> produce machine-actionable output. Two failure routes exist: the model answers in prose ("This appears to be a receipt…") or it calls a tool with malformed inputs. <code>tool_choice: "any"</code> closes the first route — the response must be one of your tools, so classification happens by tool selection itself. Strict tool use closes the second — emitted inputs match the selected schema exactly. Together, every document yields a typed, parseable record naming its own type. Keep K1 in mind even here: the output will parse; whether the extracted values are semantically right still needs validation.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>One strict tool per document type, <code>tool_choice: "any"</code>, downstream dispatch on which tool was called.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "auto + a 'respond only in JSON' instruction" — both halves probabilistic: prose escapes possible, malformed JSON possible. The deterministic pairing exists; use it.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>"tool_choice": {"type": "any"}
+tools: extract_invoice | extract_receipt | extract_po   <span class="c"># all strict: true</span>
+<span class="c"># response tool name == document classification</span></code></pre></div>
+<div class="blk quiz" data-a="A">
+<p class="q">Self-check — Mixed unknown docs, output must always be parseable + typed. Config?</p>
+<button class="opt"><span class="key">A</span>One strict tool per type + tool_choice "any"</button>
+<button class="opt"><span class="key">B</span>tool_choice "auto" + "always reply in JSON" in the prompt</button>
+<button class="opt"><span class="key">C</span>tool_choice "none" + few-shot JSON examples</button>
+<button class="opt"><span class="key">D</span>One permissive tool with all-optional free-text fields</button>
+<p class="explain">A is the only deterministic pairing; B/C are prompt-trap variants; D parses but carries no typed structure.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">K4</span><span class="t">Enum drift: add "other"+detail and "unclear", validate membership</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Enum drift — <code>"SALES"</code>, <code>"Sales inquiry"</code>, an invented <code>"partnerships"</code> — happens when reality doesn't fit the enum and the model improvises. The durable fix changes the enum so improvisation is never necessary: add an <strong><code>"other"</code></strong> member paired with a free-text <code>detail</code> string (legitimate out-of-taxonomy cases get a home without corrupting the category field) and an <strong><code>"unclear"</code></strong> member (ambiguity gets an honest label instead of a guess). Then <strong>validate every return against the allowed set</strong> in code, rejecting or routing violations. Prompt pleas ("use ONLY these values") and temperature tweaks merely lower the drift rate; they guarantee nothing — membership is guaranteed by escape valves plus a validator (and strict mode does enforce enum membership at generation time; the design problem is making the enum <em>adequate</em>).</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Enum = real categories + <code>other</code> (with required <code>other_detail</code>) + <code>unclear</code>; code-side membership validation; periodic review of <code>other_detail</code> values to evolve the taxonomy.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">TRAP 2 · prompt patch</span> "Strengthen the instruction to stick to the list" — drift is pressure from unrepresentable inputs; relieve the pressure structurally.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>"category": {"enum": ["sales","support","billing","other","unclear"]},
+"other_detail": {"type": "string"}
+<span class="c"># code:</span> assert out["category"] in ALLOWED</code></pre></div>
+<div class="blk quiz" data-a="D">
+<p class="q">Self-check — The model keeps inventing category values. Robust fix?</p>
+<button class="opt"><span class="key">A</span>Temperature 0</button>
+<button class="opt"><span class="key">B</span>A firmer "only these values" instruction</button>
+<button class="opt"><span class="key">C</span>Make category free text and normalize later</button>
+<button class="opt"><span class="key">D</span>Add "other" (+detail string) and "unclear" members, and validate returns against the allowed set</button>
+<p class="explain">Escape valves remove the pressure to invent; validation guarantees membership. A/B reduce odds only; C abandons the taxonomy.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">K5</span><span class="t">Varied date formats: normalization rules in the prompt + strict schema</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Sources write dates as "03/04/2025", "4 March 2025", "2025-03-04" — and your schema wants one canonical representation. The schema (even with a format hint) defines the <em>target</em>; it doesn't teach the <em>mapping</em>, especially ambiguity policy (is 03/04 March 4th or April 3rd?). The fix pairs both layers: <strong>explicit format-normalization rules in the prompt</strong> — target format, ambiguity resolution (e.g., "ambiguous numeric dates are DD/MM for EU-sourced docs"), examples of each source style — <strong>alongside the strict schema</strong> that locks the output shape. The rejected options each lose something: nullable hides perfectly parseable dates as null; free text abandons the schema; a permissive regex pattern accepts and <em>stores</em> the inconsistency you were trying to eliminate.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Prompt: "Normalize all dates to YYYY-MM-DD; interpret ambiguous numeric dates as DD/MM; examples: …" + strict schema field expecting the canonical form + a code-side format check.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Loosen the pattern to accept any date-like string" — that imports the chaos into your database. Canonicalize at extraction, not after.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>prompt: "Dates → YYYY-MM-DD. '4 March 2025' → 2025-03-04.
+         Ambiguous nn/nn: treat as DD/MM. If no date exists → null."
+schema: "invoice_date": {"type": ["string","null"],
+         "description": "YYYY-MM-DD"}</code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — Many source date styles, one canonical target. Best approach?</p>
+<button class="opt"><span class="key">A</span>Make the field nullable so odd formats return null</button>
+<button class="opt"><span class="key">B</span>Explicit normalization rules in the prompt alongside the strict schema</button>
+<button class="opt"><span class="key">C</span>Free-text date field, parse later</button>
+<button class="opt"><span class="key">D</span>A permissive regex accepting all observed formats</button>
+<p class="explain">The prompt teaches the mapping; the schema locks the shape. A discards data, C drops structure, D stores the inconsistency.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">K6</span><span class="t">Genuinely-absent fields: make them nullable to stop fabrication</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>A <strong>required</strong> field the model must always fill, on documents where the value is absent 40% of the time, creates structural pressure: the schema demands a value, the document has none, so the model <strong>fabricates</strong> a plausible PO number. The fabrication is a symptom of the schema contradicting reality. Fix the contradiction: make the field <strong>optional/nullable</strong>, so "absent" has a legal, honest representation — <code>null</code> — and the pressure disappears. The alternatives miss the mechanism: a required field with a sentinel like <code>"NONE"</code> still forces generation and the model may "helpfully" find a number anyway; a stricter regex pattern shapes the fabrication rather than preventing it; a prompt plea ("never invent values") fights structural pressure with probabilistic words.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p><code>"po_number": {"type": ["string","null"]}</code> + description: "null when no PO number appears in the document." Downstream treats null as a first-class state.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">TRAP 2 · prompt patch</span> The "instruct it not to fabricate" option fails because the schema keeps demanding what the document doesn't have. Remove the demand, remove the fabrication.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>BAD : "po_number": {"type": "string"}, required        <span class="c"># forces invention 40% of the time</span>
+GOOD: "po_number": {"type": ["string","null"],
+       "description": "PO number, or null if absent"}</code></pre></div>
+<div class="blk quiz" data-a="C">
+<p class="q">Self-check — PO numbers absent in 40% of docs; the model invents them. Root fix?</p>
+<button class="opt"><span class="key">A</span>Required field with sentinel value "NONE"</button>
+<button class="opt"><span class="key">B</span>A regex pattern for valid PO formats</button>
+<button class="opt"><span class="key">C</span>Make the field optional/nullable so absence returns null</button>
+<button class="opt"><span class="key">D</span>"Never fabricate values" in the system prompt</button>
+<p class="explain">Fabrication is schema pressure; nullability gives absence an honest representation. A still forces output, B shapes lies, D is the prompt trap.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">K7</span><span class="t">Route review by low confidence AND source ambiguity</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>Scarce human review should go where error risk is highest — and that risk has <strong>two independent sources</strong>. The model's <strong>low confidence</strong> catches cases where it knows it's unsure. But <strong>source-document ambiguity</strong> — internally contradictory totals, conflicting dates, illegible regions — is a risk the confidence score <em>doesn't reliably capture</em>: the model can read an ambiguous document, resolve the contradiction arbitrarily, and report <em>high</em> confidence in its arbitrary resolution. So the routing predicate is a union: review extractions with low confidence <strong>AND ALSO</strong> extractions whose <em>source</em> was flagged ambiguous or self-contradictory (detectable via cross-field checks like K1's reconciliation, or an explicit document-quality flag). Confidence-only routing systematically misses the second class.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Queue = {confidence &lt; τ} ∪ {source flagged ambiguous/contradictory}. Emit an ambiguity flag during extraction; compute contradiction flags in validation.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Low confidence alone is the efficient filter" — efficient at catching <em>known</em> unknowns only; confidently-wrong-on-ambiguous-input is the failure class it can't see.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>route_to_human = (out.confidence &lt; 0.7) \
+              or out.source_flags.ambiguous \
+              or out.conflict_detected        <span class="c"># e.g. totals disagree</span></code></pre></div>
+<div class="blk quiz" data-a="D">
+<p class="q">Self-check — Why route ambiguous-source extractions to review even at high confidence?</p>
+<button class="opt"><span class="key">A</span>Ambiguous documents always yield low confidence anyway</button>
+<button class="opt"><span class="key">B</span>High-confidence outputs are the cheapest to review</button>
+<button class="opt"><span class="key">C</span>Confidence scores are random</button>
+<button class="opt"><span class="key">D</span>Source ambiguity is an error risk confidence doesn't capture — models can be confidently wrong on contradictory inputs</button>
+<p class="explain">The two risk signals are independent; route on the union, not confidence alone.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">K8</span><span class="t">Stratified validation: aggregates hide weak segments</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>A 98% aggregate accuracy can coexist with <strong>60% on handwritten documents</strong> — if handwritten is a small share of volume, its failures barely dent the average. Reducing human review based on the aggregate would silently expose exactly the weakest segment. Before any review reduction, <strong>stratify validation per document type and per field</strong>: typed invoices vs scans vs handwritten; totals vs dates vs line items. Decisions then attach to the stratum: keep full review on handwritten until it independently clears the bar; relax review on segments that earn it. This is Simpson's-paradox hygiene applied to extraction QA — the aggregate is a weighted blend that can mask any minority segment's collapse.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Validation report = accuracy matrix (doc type × field); per-stratum thresholds gate per-stratum review policy; aggregate is reported but never used as the gate.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "98% overall clears our 95% bar — reduce review across the board." The bar must be cleared <em>per segment</em> the policy will apply to.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>typed PDFs    99.1%  ✓ relax review
+scanned       96.4%  ✓ relax review
+handwritten   60.2%  ✗ KEEP full review   <span class="c"># invisible in the 98% aggregate</span></code></pre></div>
+<div class="blk quiz" data-a="B">
+<p class="q">Self-check — 98% aggregate accuracy. Before cutting review, you should:</p>
+<button class="opt"><span class="key">A</span>Cut review — 98% exceeds the target</button>
+<button class="opt"><span class="key">B</span>Validate per document type and field; weak strata (e.g., handwritten at 60%) keep full review</button>
+<button class="opt"><span class="key">C</span>Re-run validation for a better aggregate</button>
+<button class="opt"><span class="key">D</span>Cut review only for the largest segment</button>
+<p class="explain">Aggregates are blends; policy must follow per-stratum evidence.</p>
+</div>
+</div></div></div>
+</article>
+
+<article class="card">
+<button class="card-head" aria-expanded="false"><span class="code">K9</span><span class="t">Before the 100k-doc run: prove the config on a sample first</span><span class="chev"></span></button>
+<div class="card-body"><div class="inner"><div class="inner-pad">
+<div class="blk"><h4>Concept</h4>
+<p>A batch of 100,000 documents amplifies whatever configuration you submit — including its flaws — by 100,000. The professional sequence: <strong>refine prompt and schema on a representative sample</strong> (covering every document type and edge case in realistic proportions), iterate until <strong>first-pass success is high</strong>, and only <strong>then</strong> run the full batch with the <em>proven</em> configuration. Submitting at scale first and "fixing issues as they appear" pays for the same mistakes a hundred thousand times, burns part of the 24-hour window on doomed requests, and floods you with failures whose remediation is itself a batch-scale project. Sample-first converts an expensive open-loop gamble into a cheap closed-loop iteration — the batch should be the victory lap, not the experiment.</p></div>
+<div class="blk"><h4>Correct design</h4>
+<p>Stratified sample (~200–1,000 docs) → measure per-type accuracy (K8) → fix prompt/schema → repeat until stable → submit 100k with the frozen config → spot-check results.</p></div>
+<div class="blk"><h4>Why I got it wrong</h4>
+<p><span class="trap">DISTRACTOR</span> "Batches are cheap — just run it and resubmit failures" — failure cost isn't only tokens: it's the SLA window, triage labor, and silent semantic errors (K1) that no resubmission loop catches.</p></div>
+<div class="blk"><h4>Worked example</h4>
+<pre><code>sample 500 (stratified) → 81% first-pass → fix date rules (K5),
+nullable PO (K6), enum valves (K4) → 97.5% → freeze config
+→ submit 100,000 → spot-check per stratum</code></pre></div>
+<div class="blk quiz" data-a="C">
+<p class="q">Self-check — Right before a 100k-document extraction batch, the key step is:</p>
+<button class="opt"><span class="key">A</span>Split into ten 10k batches and submit all at once</button>
+<button class="opt"><span class="key">B</span>Submit everything and patch the prompt based on failures</button>
+<button class="opt"><span class="key">C</span>Refine prompt and schema on a representative sample until first-pass success is high, then run the batch with the proven config</button>
+<button class="opt"><span class="key">D</span>Double max_tokens as a safety margin</button>
+<p class="explain">Iterate cheaply at sample scale; submit at full scale only what's proven. A is logistics, not validation; B pays for mistakes 100,000×.</p>
+</div>
+</div></div></div>
+</article>
+</section>
+
+<footer>
+  Recovery guide · 53 topics across themes A–K · Built for re-test readiness. Re-take a mock once every self-check here is automatic.
+</footer>
+</main>
+</div>
+
+<button id="toTop" aria-label="Back to top"><span></span></button>
+
+<script>
+(function(){
+"use strict";
+var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- scroll progress bar ---------- */
+var progress = document.getElementById("progress");
+function updateProgress(){
+  var doc = document.documentElement;
+  var max = doc.scrollHeight - window.innerHeight;
+  var pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+  progress.style.width = pct + "%";
+}
+window.addEventListener("scroll", updateProgress, {passive:true});
+window.addEventListener("resize", updateProgress);
+updateProgress();
+
+/* ---------- hero count-up ---------- */
+function countUp(el, target, suffix, dur){
+  if (reduce){ el.textContent = target + (suffix||""); return; }
+  var start = null;
+  function step(ts){
+    if (!start) start = ts;
+    var p = Math.min((ts - start) / dur, 1);
+    var eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(eased * target) + (suffix||"");
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+var cs = document.getElementById("countScore");
+var cp = document.getElementById("countPct");
+if (cs) countUp(cs, 29, "", 1200);
+if (cp) countUp(cp, 48, "", 1400);
+
+/* ---------- scroll reveals: cards + dashboard bars ---------- */
+var io = null;
+if ("IntersectionObserver" in window && !reduce){
+  io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (!e.isIntersecting) return;
+      if (e.target.classList.contains("card")) e.target.classList.add("revealed");
+      else e.target.classList.add("in");
+      io.unobserve(e.target);
+    });
+  }, {threshold: 0.12});
+  document.querySelectorAll(".card").forEach(function(c){ io.observe(c); });
+  var dash = document.getElementById("dashboard");
+  if (dash) io.observe(dash);
+} else {
+  document.querySelectorAll(".card").forEach(function(c){ c.classList.add("revealed"); });
+  var d2 = document.getElementById("dashboard");
+  if (d2) d2.classList.add("in");
+}
+
+/* ---------- accordion ---------- */
+function setOpen(card, open){
+  card.classList.toggle("open", open);
+  var head = card.querySelector(".card-head");
+  if (head) head.setAttribute("aria-expanded", open ? "true" : "false");
+}
+document.querySelectorAll(".card-head").forEach(function(head){
+  head.setAttribute("aria-expanded","false");
+  head.addEventListener("click", function(){
+    var card = head.closest(".card");
+    setOpen(card, !card.classList.contains("open"));
+  });
+});
+var expandAll = document.getElementById("expandAll");
+var collapseAll = document.getElementById("collapseAll");
+if (expandAll) expandAll.addEventListener("click", function(){
+  document.querySelectorAll(".card").forEach(function(c){ setOpen(c, true); });
+});
+if (collapseAll) collapseAll.addEventListener("click", function(){
+  document.querySelectorAll(".card").forEach(function(c){ setOpen(c, false); });
+});
+
+/* ---------- self-check quizzes ---------- */
+document.addEventListener("click", function(ev){
+  var opt = ev.target.closest(".opt");
+  if (!opt) return;
+  var quiz = opt.closest(".quiz");
+  if (!quiz || quiz.classList.contains("done")) return;
+  var answer = (quiz.getAttribute("data-a") || "").trim().toUpperCase();
+  var keyEl = opt.querySelector(".key");
+  var picked = keyEl ? keyEl.textContent.trim().toUpperCase() : "";
+  if (picked !== answer) opt.classList.add("wrong");
+  quiz.querySelectorAll(".opt").forEach(function(o){
+    var k = o.querySelector(".key");
+    if (k && k.textContent.trim().toUpperCase() === answer) o.classList.add("correct");
+  });
+  quiz.classList.add("done");
+});
+
+/* ---------- mobile nav toggle ---------- */
+var navToggle = document.getElementById("navToggle");
+var sidenav = document.getElementById("sidenav");
+if (navToggle && sidenav){
+  navToggle.addEventListener("click", function(){
+    var open = sidenav.classList.toggle("open");
+    navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  sidenav.addEventListener("click", function(ev){
+    if (ev.target.closest("a")) sidenav.classList.remove("open");
+  });
+}
+
+/* ---------- active section highlighting ---------- */
+var navLinks = Array.prototype.slice.call(document.querySelectorAll("#sidenav a[href^='#']"));
+var linkFor = {};
+navLinks.forEach(function(a){ linkFor[a.getAttribute("href").slice(1)] = a; });
+var sections = Array.prototype.slice.call(document.querySelectorAll("section.theme[id]"));
+function setActive(id){
+  navLinks.forEach(function(a){ a.classList.remove("active"); });
+  if (linkFor[id]) linkFor[id].classList.add("active");
+}
+if ("IntersectionObserver" in window && sections.length){
+  var visible = {};
+  var navIO = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ visible[e.target.id] = e.isIntersecting; });
+    for (var i = 0; i < sections.length; i++){
+      if (visible[sections[i].id]){ setActive(sections[i].id); return; }
+    }
+  }, {rootMargin: "-20% 0px -65% 0px"});
+  sections.forEach(function(s){ navIO.observe(s); });
+} else if (sections.length){
+  window.addEventListener("scroll", function(){
+    var y = window.scrollY + 120, cur = sections[0].id;
+    sections.forEach(function(s){ if (s.offsetTop <= y) cur = s.id; });
+    setActive(cur);
+  }, {passive:true});
+}
+
+/* ---------- back to top ---------- */
+var toTop = document.getElementById("toTop");
+if (toTop){
+  window.addEventListener("scroll", function(){
+    toTop.classList.toggle("show", window.scrollY > 600);
+  }, {passive:true});
+  toTop.addEventListener("click", function(){
+    window.scrollTo({top: 0, behavior: reduce ? "auto" : "smooth"});
+  });
+}
+})();
+</script>
+</body>
+</html>
